@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, ScrollView, ImageSourcePropType } from 'react-native';
-import LifestyleCard, { LifestyleItem } from './LifestyleCard';
+import LifestyleCard, { LifestyleItem } from '../LifestyleCard';
 
 // Exact images from Figma - downloaded and ready to use
 const DUMMY_LIFESTYLE_ITEMS: LifestyleItem[] = [

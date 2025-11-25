@@ -9,7 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { GeneralInfoStackNavigationProp } from '../types/navigation';
-import Header from '../components/Header';
+import Header from '../components/layout/Header';
 
 // Dummy static data - Replace with API call later
 const DUMMY_PRIVACY_CONTENT = `Effective Date: [Insert Date]

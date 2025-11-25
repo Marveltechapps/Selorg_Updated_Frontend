@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import ChatIcon from '../assets/images/chat-icon.svg';
+import ChatIcon from '../../../assets/images/chat-icon.svg';
 
 interface SupportCardProps {
   onChatPress?: () => void;

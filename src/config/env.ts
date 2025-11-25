@@ -1,16 +1,9 @@
 /**
  * Environment Configuration
- * Manages environment variables using react-native-config
+ * Manages environment variables using expo-constants
  */
 
-let Config: any = null;
-
-// Safely import react-native-config with error handling
-try {
-  Config = require('react-native-config').default || require('react-native-config');
-} catch (error) {
-  console.warn('react-native-config not available, using default values', error);
-}
+import Constants from 'expo-constants';
 
 export type Environment = 'development' | 'staging' | 'production';
 
@@ -32,35 +25,15 @@ const DEFAULT_CONFIG: EnvConfig = {
 };
 
 /**
- * Safely get a config value with fallback
+ * Safely get a config value from expo-constants with fallback
  */
 const getConfigValue = (key: string, defaultValue: string): string => {
   try {
-    // Check if Config exists and is not null
-    if (!Config || Config === null || typeof Config === 'undefined') {
-      return defaultValue;
-    }
-    
-    // Handle both Config.key and Config.getConfig().key patterns
-    // Only check getConfig if Config is not null
-    if (Config && typeof Config === 'object' && 'getConfig' in Config && typeof Config.getConfig === 'function') {
-      try {
-        const config = Config.getConfig();
-        if (config && typeof config === 'object' && config !== null && key in config && config[key] !== undefined) {
-          return String(config[key]);
-        }
-      } catch (getConfigError) {
-        // If getConfig() fails, fall through to direct property access
-        console.warn(`Error calling Config.getConfig() for key ${key}:`, getConfigError);
-      }
-    }
-    
-    // Direct property access (standard react-native-config pattern)
-    if (Config && typeof Config === 'object' && key in Config && Config[key] !== undefined) {
-      const value = Config[key];
+    const extra = Constants.expoConfig?.extra;
+    if (extra && typeof extra === 'object' && key in extra) {
+      const value = extra[key];
       return value !== null && value !== undefined ? String(value) : defaultValue;
     }
-    
     return defaultValue;
   } catch (error) {
     console.warn(`Error accessing config key ${key}:`, error);
@@ -73,14 +46,14 @@ const getConfigValue = (key: string, defaultValue: string): string => {
  */
 export const getEnvConfig = (): EnvConfig => {
   try {
-    const env = (getConfigValue('ENV', 'development') || 'development') as Environment;
+    const env = (getConfigValue('env', 'development') || 'development') as Environment;
 
     return {
       env,
-      apiBaseUrl: getConfigValue('API_BASE_URL', DEFAULT_CONFIG.apiBaseUrl),
-      apiVersion: getConfigValue('API_VERSION', DEFAULT_CONFIG.apiVersion),
-      enableLogging: getConfigValue('ENABLE_LOGGING', 'true') === 'true',
-      enableAnalytics: getConfigValue('ENABLE_ANALYTICS', 'true') === 'true',
+      apiBaseUrl: getConfigValue('apiBaseUrl', DEFAULT_CONFIG.apiBaseUrl),
+      apiVersion: getConfigValue('apiVersion', DEFAULT_CONFIG.apiVersion),
+      enableLogging: getConfigValue('enableLogging', 'true') === 'true',
+      enableAnalytics: getConfigValue('enableAnalytics', 'true') === 'true',
     };
   } catch (error) {
     console.error('Error getting environment config, using defaults:', error);

@@ -1,21 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useDimensions, scale, getSpacing, wp } from '../utils/responsive';
-
-// Safely import Video with error handling
-let Video: any = null;
-let isVideoAvailable = false;
-
-try {
-  Video = require('react-native-video').default;
-  // Check if native module is available
-  if (Video && typeof Video === 'function') {
-    isVideoAvailable = true;
-  }
-} catch (error) {
-  console.warn('react-native-video not available:', error);
-  isVideoAvailable = false;
-}
+import { VideoView, useVideoPlayer } from 'expo-av';
+import { useDimensions, scale, getSpacing, wp } from '../../utils/responsive';
 
 interface VideoSectionProps {
   onPress?: () => void;
@@ -40,13 +26,18 @@ export default function VideoSection({ onPress }: VideoSectionProps) {
     };
   }, [screenWidth]);
 
-  // TODO: Verify react-native-video implementation - API differs from expo-video
+  // Use expo-av video player
+  const player = useVideoPlayer(require('../../assets/images/categories/video-section-png.mp4'), (player) => {
+    player.loop = true;
+    player.play();
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        {isVideoAvailable && Video ? (
-          <Video
-            source={require('../assets/images/categories/video-section-png.mp4')}
+        {player ? (
+          <VideoView
+            player={player}
             style={[
               styles.video,
               {
@@ -54,13 +45,11 @@ export default function VideoSection({ onPress }: VideoSectionProps) {
                 height: videoDimensions.videoHeight,
               },
             ]}
-            resizeMode="cover"
-            repeat={true}
-            paused={false}
+            contentFit="cover"
+            nativeControls={false}
             onError={(error: any) => {
               console.warn('Video playback error:', error);
             }}
-            // TODO: Verify react-native-video props match expo-video behavior
           />
         ) : (
           // Fallback: Show placeholder
@@ -76,7 +65,7 @@ export default function VideoSection({ onPress }: VideoSectionProps) {
               },
             ]}
           >
-            {/* Video placeholder - will show when native module is fixed */}
+            {/* Video placeholder */}
           </View>
         )}
       </View>

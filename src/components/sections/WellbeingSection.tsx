@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, ImageSourcePropType } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import type { RootStackNavigationProp } from '../types/navigation';
+import type { RootStackNavigationProp } from '../../types/navigation';
 import Text from '../common/Text';
-import WellbeingCard, { WellbeingProduct } from './WellbeingCard';
+import WellbeingCard, { WellbeingProduct } from '../WellbeingCard';
 
 // Dummy static data - ready for API replacement
 const DUMMY_PRODUCTS: WellbeingProduct[] = [

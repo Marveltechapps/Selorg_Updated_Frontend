@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from 'expo-linear-gradient';
 import Text from '../common/Text';
-import ProductCard, { Product } from './ProductCard';
-import ProductVariantModal, { ProductVariant } from './ProductVariantModal';
-import { useCart } from '../contexts/CartContext';
+import ProductCard, { Product } from '../features/product/ProductCard';
+import ProductVariantModal, { ProductVariant } from '../features/product/ProductVariantModal';
+import { useCart } from '../../contexts/CartContext';
 
 // Dummy static data - ready for API replacement
 const DUMMY_PRODUCTS: Product[] = [

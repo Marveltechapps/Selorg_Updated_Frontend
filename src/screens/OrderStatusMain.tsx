@@ -23,16 +23,15 @@ import {
   TouchableOpacity,
   Image,
   Platform,
-  PermissionsAndroid,
   ActivityIndicator,
   Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import Geolocation from '@react-native-community/geolocation';
+import * as Location from 'expo-location';
 import type { OrdersStackNavigationProp } from '../types/navigation';
-import Header from '../components/Header';
-import RouteMap from '../components/RouteMap';
+import Header from '../components/layout/Header';
+import RouteMap from '../components/features/location/RouteMap';
 import PhoneIcon from '../assets/images/phone-icon.svg';
 import HomeIcon from '../assets/images/home-icon.svg';
 import StoreIcon from '../assets/images/store-icon.svg';
@@ -126,66 +125,22 @@ const OrderStatusMain: React.FC = () => {
     setLocationLoading(true);
 
     try {
-      if (Platform.OS === 'android') {
-        // Check if permission is already granted
-        const checkResult = await PermissionsAndroid.check(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-        );
-
-        if (checkResult) {
-          // Permission already granted, just fetch location
-          setHasLocationPermission(true);
-          setLocationPermissionStatus('granted');
-          fetchCurrentLocation().catch((error) => {
-            console.error('Error fetching location after permission check:', error);
-            // Error will be handled by fetchCurrentLocation's error handler
-          });
-          return;
-        }
-
-        // Request permission
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location to show the route to your delivery address.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          setHasLocationPermission(true);
-          setLocationPermissionStatus('granted');
-          // Fetch location - errors will be handled by fetchCurrentLocation
-          fetchCurrentLocation().catch((error) => {
-            console.error('Error fetching location after permission grant:', error);
-            // Error will be handled by fetchCurrentLocation's error handler
-          });
-        } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-          setHasLocationPermission(false);
-          setLocationPermissionStatus('denied');
-          setLocationError('Location permission denied. Please enable it in Settings.');
-          setLocationLoading(false);
-        } else {
-          setHasLocationPermission(false);
-          setLocationPermissionStatus('denied');
-          setLocationError('Location permission denied');
-          setLocationLoading(false);
-        }
+      // Request location permission using expo-location
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status === 'granted') {
+        setHasLocationPermission(true);
+        setLocationPermissionStatus('granted');
+        // Fetch location - errors will be handled by fetchCurrentLocation
+        await fetchCurrentLocation().catch((error) => {
+          console.error('Error fetching location after permission grant:', error);
+          // Error will be handled by fetchCurrentLocation's error handler
+        });
       } else {
-        // iOS - permissions are handled via Info.plist
-        // Geolocation will prompt automatically when getCurrentPosition is called
-        setLocationPermissionStatus('requesting');
-        // Fetch location - wrap in try-catch to prevent errors from bubbling up
-        try {
-          await fetchCurrentLocation();
-        } catch (locationError: any) {
-          // Location fetch errors are handled by fetchCurrentLocation's error callback
-          // This catch is just to prevent the error from bubbling to the outer catch
-          console.log('Location fetch completed (success or handled error)');
-        }
+        setHasLocationPermission(false);
+        setLocationPermissionStatus('denied');
+        setLocationError('Location permission denied. Please enable it in Settings.');
+        setLocationLoading(false);
       }
     } catch (error: any) {
       console.error('Error in requestLocationPermission:', error);
@@ -206,63 +161,45 @@ const OrderStatusMain: React.FC = () => {
     }
   };
 
-  // Fetch current location using Geolocation API
+  // Fetch current location using expo-location API
   const fetchCurrentLocation = async (): Promise<void> => {
-    return new Promise((resolve, reject) => {
+    try {
       setLocationLoading(true);
       setLocationError(null);
 
-      Geolocation.getCurrentPosition(
-        (position) => {
-          const location: LocationCoordinates = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
-          setCurrentLocation(location);
-          setHasLocationPermission(true);
-          setLocationPermissionStatus('granted');
-          setLocationLoading(false);
-          resolve();
-        },
-        (error: any) => {
-          console.error('Error getting location:', error);
-          console.error('Error code:', error.code);
-          console.error('Error message:', error.message);
-          
-          let errorMessage = 'Failed to get current location';
-          let shouldReject = true;
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
 
-          if (error.code === 1) {
-            // PERMISSION_DENIED
-            errorMessage = 'Location permission denied. Please enable location access in Settings.';
-            setLocationPermissionStatus('denied');
-            setHasLocationPermission(false);
-          } else if (error.code === 2) {
-            // POSITION_UNAVAILABLE
-            errorMessage = 'Location information is unavailable. Please check your device settings.';
-          } else if (error.code === 3) {
-            // TIMEOUT
-            errorMessage = 'Location request timed out. Please try again.';
-          } else {
-            // Unknown error
-            errorMessage = `Failed to get location: ${error.message || 'Unknown error'}`;
-          }
+      const locationData: LocationCoordinates = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setCurrentLocation(locationData);
+      setHasLocationPermission(true);
+      setLocationPermissionStatus('granted');
+      setLocationLoading(false);
+    } catch (error: any) {
+      console.error('Error getting location:', error);
+      
+      let errorMessage = 'Failed to get current location';
+      
+      if (error.code === 'E_LOCATION_PERMISSION_DENIED') {
+        errorMessage = 'Location permission denied. Please enable location access in Settings.';
+        setLocationPermissionStatus('denied');
+        setHasLocationPermission(false);
+      } else if (error.code === 'E_LOCATION_UNAVAILABLE') {
+        errorMessage = 'Location information is unavailable. Please check your device settings.';
+      } else if (error.code === 'E_LOCATION_TIMEOUT') {
+        errorMessage = 'Location request timed out. Please try again.';
+      } else {
+        errorMessage = `Failed to get location: ${error.message || 'Unknown error'}`;
+      }
 
-          setLocationError(errorMessage);
-          setLocationLoading(false);
-          
-          // Only reject if it's not a permission error that we want to handle gracefully
-          if (shouldReject) {
-            reject(error);
-          }
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 10000,
-        }
-      );
-    });
+      setLocationError(errorMessage);
+      setLocationLoading(false);
+      throw error;
+    }
   };
 
   const handleOrderPress = (order: OrderStatus) => {

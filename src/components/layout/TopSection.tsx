@@ -1,39 +1,14 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import { VideoView, useVideoPlayer } from 'expo-av';
+import LinearGradient from 'expo-linear-gradient';
 import LocationSelector from '../features/location/LocationSelector';
 import SearchBar from '../features/search/SearchBar';
 import ProfileIconHome from '../icons/ProfileIconHome';
 import MuteIcon from '../icons/MuteIcon';
 import UnmuteIcon from '../icons/UnmuteIcon';
 import { TouchableOpacity } from 'react-native';
-import { useDimensions, scale, getSpacing, wp, hp } from '../utils/responsive';
-
-// Safely import Video with error handling
-// react-native-video exports as default, so we need to handle it properly
-let VideoComponent: React.ComponentType<any> | null = null;
-let isVideoAvailable = false;
-
-try {
-  const videoModule = require('react-native-video');
-  // react-native-video v6+ exports as default
-  const VideoExport = videoModule.default || videoModule;
-  
-  if (VideoExport) {
-    VideoComponent = VideoExport as React.ComponentType<any>;
-    isVideoAvailable = true;
-    console.log('react-native-video loaded successfully');
-  } else {
-    console.warn('react-native-video module found but export is invalid');
-    isVideoAvailable = false;
-  }
-} catch (error) {
-  console.warn('react-native-video not available:', error);
-  isVideoAvailable = false;
-}
-
-// Create a Video component wrapper for type safety
-const Video = VideoComponent;
+import { useDimensions, scale, getSpacing, wp, hp } from '../../utils/responsive';
 
 interface TopSectionProps {
   deliveryType?: string;
@@ -60,10 +35,15 @@ export default function TopSection({
   const videoContainerRef = useRef<View>(null);
   const [videoLayout, setVideoLayout] = useState({ y: 0, height: 0 });
   const [isMuted, setIsMuted] = useState(false);
-  const [isPaused, setIsPaused] = useState(!isVisible);
   const [videoError, setVideoError] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
-  const videoRef = useRef<any>(null);
+  
+  // Use expo-av video player
+  const player = useVideoPlayer(require('../assets/images/categories/video-section-png.mp4'), (player) => {
+    player.loop = true;
+    player.muted = isMuted;
+    player.play();
+  });
 
   // Responsive video dimensions - maintain aspect ratio from design (340/381)
   const videoDimensions = useMemo(() => {
@@ -81,24 +61,23 @@ export default function TopSection({
     };
   }, [screenWidth]);
 
-  // Reset error state when component mounts or video becomes available
-  useEffect(() => {
-    if (isVideoAvailable && Video) {
-      setVideoError(false);
-      console.log('[TopSection] Video component available, resetting error state');
-    } else {
-      console.warn('[TopSection] Video component not available:', {
-        isVideoAvailable,
-        hasVideo: !!Video,
-      });
-    }
-  }, [isVideoAvailable]);
-
-  // TODO: Verify react-native-video implementation - API differs from expo-video
   // Control video playback based on visibility
   useEffect(() => {
-    setIsPaused(!isVisible);
-  }, [isVisible]);
+    if (player) {
+      if (isVisible) {
+        player.play();
+      } else {
+        player.pause();
+      }
+    }
+  }, [isVisible, player]);
+
+  // Update mute state
+  useEffect(() => {
+    if (player) {
+      player.muted = isMuted;
+    }
+  }, [isMuted, player]);
 
   const handleMuteToggle = () => {
     setIsMuted(!isMuted);
@@ -123,45 +102,27 @@ export default function TopSection({
         }]}
         onLayout={handleVideoLayout}
       >
-        {isVideoAvailable && Video && !videoError ? (
+        {player && !videoError ? (
           <>
-            <Video
-              ref={videoRef}
-              source={require('../assets/images/categories/video-section-png.mp4')}
+            <VideoView
+              player={player}
               style={[styles.backgroundVideo, { height: videoDimensions.videoHeight, top: scale(-20) }]}
-              resizeMode="cover"
-              repeat={true}
-              paused={isPaused}
-              muted={isMuted}
-              playInBackground={false}
-              playWhenInactive={false}
-              ignoreSilentSwitch="ignore"
-              onLoad={() => {
-                console.log('[TopSection] Video loaded successfully');
-                setVideoLoaded(true);
-                setVideoError(false);
-              }}
+              contentFit="cover"
+              nativeControls={false}
               onLoadStart={() => {
                 console.log('[TopSection] Video load started');
                 setVideoLoaded(false);
                 setVideoError(false);
               }}
-              onError={(error: any) => {
-                console.error('[TopSection] Video playback error:', error);
-                console.error('[TopSection] Error details:', JSON.stringify(error, null, 2));
-                setVideoError(true);
-                setVideoLoaded(false);
-              }}
-              onBuffer={(data: any) => {
-                // Handle buffering if needed
-                if (data?.isBuffering) {
-                  console.log('[TopSection] Video buffering...');
-                }
-              }}
-              onReadyForDisplay={() => {
-                console.log('[TopSection] Video ready for display');
+              onLoad={() => {
+                console.log('[TopSection] Video loaded successfully');
                 setVideoLoaded(true);
                 setVideoError(false);
+              }}
+              onError={(error: any) => {
+                console.error('[TopSection] Video playback error:', error);
+                setVideoError(true);
+                setVideoLoaded(false);
               }}
             />
 

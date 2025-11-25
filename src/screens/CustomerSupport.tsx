@@ -9,9 +9,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { CustomerSupportStackNavigationProp } from '../types/navigation';
-import Header from '../components/Header';
-import HelpItem from '../components/HelpItem';
-import SupportCard from '../components/SupportCard';
+import Header from '../components/layout/Header';
+import HelpItem from '../components/features/support/HelpItem';
+import SupportCard from '../components/features/support/SupportCard';
 
 // Dummy static data - Replace with API call later
 const HELP_ITEMS = [

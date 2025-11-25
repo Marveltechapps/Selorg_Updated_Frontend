@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, StatusBar, Platform, ScrollView, TouchableOpacity, Image, ImageSourcePropType } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
+import LinearGradient from 'expo-linear-gradient';
 import type { RootStackNavigationProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import SearchIcon from '../components/icons/SearchIcon';

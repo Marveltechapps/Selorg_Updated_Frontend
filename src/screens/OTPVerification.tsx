@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Header from '../components/Header';
+import Header from '../components/layout/Header';
 import OTPIconContainer from '../assets/images/otp-icon-container.svg';
 import type { RootStackParamList } from '../types/navigation';
 import { useDimensions, scale, scaleFont, getSpacing, getBorderRadius, wp } from '../utils/responsive';

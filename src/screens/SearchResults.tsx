@@ -5,8 +5,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RootStackNavigationProp, RootStackRouteProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import Text from '../components/common/Text';
-import ProductCard, { Product } from '../components/ProductCard';
-import ProductVariantModal, { ProductVariant } from '../components/ProductVariantModal';
+import ProductCard, { Product } from '../components/features/product/ProductCard';
+import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
 import { useCart } from '../contexts/CartContext';
 
 // Dummy static data - ready for API replacement

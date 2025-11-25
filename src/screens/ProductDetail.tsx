@@ -23,9 +23,9 @@ import PlusIcon from '../components/icons/PlusIcon';
 import MinusIcon from '../components/icons/MinusIcon';
 import DropdownArrowIcon from '../components/icons/DropdownArrowIcon';
 import ChevronDownIcon from '../components/icons/ChevronDownIcon';
-import ProductCard, { Product } from '../components/ProductCard';
-import ProductVariantModal, { ProductVariant } from '../components/ProductVariantModal';
-import FloatingCartBar from '../components/FloatingCartBar';
+import ProductCard, { Product } from '../components/features/product/ProductCard';
+import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
+import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 import { useCart } from '../contexts/CartContext';
 
 // Dummy static data - ready for API replacement

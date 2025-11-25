@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { OrdersStackNavigationProp } from '../types/navigation';
-import Header from '../components/Header';
+import Header from '../components/layout/Header';
 import CheckmarkIcon from '../assets/images/checkmark-icon.svg';
 import ClockIcon from '../assets/images/clock-icon.svg';
 import ChatIcon from '../assets/images/chat-icon.svg';

@@ -2,13 +2,10 @@
  * @format
  */
 
-import { AppRegistry } from 'react-native';
-import { enableScreens } from 'react-native-screens';
+import { registerRootComponent } from 'expo';
 import App from './App';
-import { name as appName } from './app.json';
 
-// Enable native screens BEFORE any components are rendered
-// This must be called at the very top level
-enableScreens(true);
-
-AppRegistry.registerComponent(appName, () => App);
+// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
+// It also ensures that whether you load the app in Expo Go or in a native build,
+// the environment is set up appropriately
+registerRootComponent(App);

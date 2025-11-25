@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import Text from '../components/common/Text';
-import SearchSuggestionItem from '../components/SearchSuggestionItem';
+import SearchSuggestionItem from '../components/features/search/SearchSuggestionItem';
 
 // Dummy static data - ready for API replacement
 interface SearchItem {

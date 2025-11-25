@@ -34,8 +34,8 @@ import type {
   OrdersStackRouteProp,
   RootStackNavigationProp,
 } from '../types/navigation';
-import Header from '../components/Header';
-import RouteMap from '../components/RouteMap';
+import Header from '../components/layout/Header';
+import RouteMap from '../components/features/location/RouteMap';
 import PhoneIcon from '../assets/images/phone-icon.svg';
 import RupeeIcon from '../assets/images/rupee-icon.svg';
 import ChevronRightIcon from '../assets/images/chevron-right.svg';

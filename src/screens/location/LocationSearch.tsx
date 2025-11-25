@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { LocationStackNavigationProp } from '../../types/navigation';
-import Header from '../../components/Header';
+import Header from '../../components/layout/Header';
 import SearchIcon from '../../assets/images/search-icon.svg';
 import CurrentLocationIcon from '../../assets/images/current-location-icon.svg';
 import MapPinIcon from '../../assets/images/map-pin.svg';

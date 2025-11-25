@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { LocationStackNavigationProp } from '../../types/navigation';
-import Header from '../../components/Header';
+import Header from '../../components/layout/Header';
 import LocationIcon from '../../assets/images/location-icon.svg';
 
 // Dummy static data - Replace with API call later

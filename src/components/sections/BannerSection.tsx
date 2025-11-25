@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, Image, ImageSourcePropType, ScrollView, Animated, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { RootStackNavigationProp } from '../types/navigation';
-import { getWindowDimensions, getSpacing } from '../utils/responsive';
+import type { RootStackNavigationProp } from '../../types/navigation';
+import { getWindowDimensions, getSpacing } from '../../utils/responsive';
 
 // Exact image from Figma - banner-section-297a1c.png
 // Update to use exact image once downloaded: require('../assets/images/banner-section-297a1c.png')

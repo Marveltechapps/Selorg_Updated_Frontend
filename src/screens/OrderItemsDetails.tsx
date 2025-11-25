@@ -25,7 +25,7 @@ import type {
   OrdersStackNavigationProp,
   OrdersStackRouteProp,
 } from '../types/navigation';
-import Header from '../components/Header';
+import Header from '../components/layout/Header';
 import ChatIconOrder from '../assets/images/chat-icon-order.svg';
 import StatusIconGettingPacked from '../assets/images/status-icon-getting-packed.svg';
 

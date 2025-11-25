@@ -4,7 +4,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import Home from '../screens/Home';
 import CategoriesExpo from '../screens/CategoriesExpo';
 import Checkout from '../screens/Checkout';
-import BottomNavigationBar from '../components/BottomNavigationBar';
+import BottomNavigationBar from '../components/layout/BottomNavigationBar';
 import type { MainTabParamList } from '../types/navigation';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();

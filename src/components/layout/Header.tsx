@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import BackButtonIcon from '../assets/images/back-button.svg';
+import BackButtonIcon from '../../assets/images/back-button.svg';
 
 interface HeaderProps {
   title: string;

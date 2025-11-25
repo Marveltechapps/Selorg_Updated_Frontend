@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
-import ChevronDownIcon from '../assets/images/chevron-down.svg';
-import ChevronUpIcon from '../assets/images/chevron-up.svg';
+import ChevronDownIcon from '../../../assets/images/chevron-down.svg';
+import ChevronUpIcon from '../../../assets/images/chevron-up.svg';
 
 interface FAQItemProps {
   question: string;

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { RefundsStackNavigationProp } from '../types/navigation';
-import Header from '../components/Header';
+import Header from '../components/layout/Header';
 import NoRefundsIcon from '../assets/images/no-refunds-icon.svg';
 
 // Dummy static data - Replace with API call later

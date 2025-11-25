@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import BackButton from '../components/BackButton';
 import Text from '../components/common/Text';
-import OrderCard from '../components/OrderCard';
+import OrderCard from '../components/features/order/OrderCard';
 import { Theme } from '../constants/Theme';
 
 type FilterType = 'all' | 'delivered' | 'cancelled';

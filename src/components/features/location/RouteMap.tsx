@@ -13,16 +13,16 @@ import {
   StyleSheet, 
   ActivityIndicator, 
   Text, 
-  PermissionsAndroid, 
   Platform, 
   Linking, 
   TouchableOpacity
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
-import Geolocation from '@react-native-community/geolocation';
+import * as Location from 'expo-location';
+import Constants from 'expo-constants';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyAKVumkjaEhGUefBCclE23rivFqPK3LDRQ';
+const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey || 'AIzaSyAKVumkjaEhGUefBCclE23rivFqPK3LDRQ';
 
 interface RouteMapProps {
   deliveryAddress: string;
@@ -42,13 +42,6 @@ interface Location {
   longitude: number;
 }
 
-interface GeolocationError {
-  code: number;
-  message: string;
-  PERMISSION_DENIED?: number;
-  POSITION_UNAVAILABLE?: number;
-  TIMEOUT?: number;
-}
 
 const RouteMap: React.FC<RouteMapProps> = ({
   deliveryAddress,
@@ -66,17 +59,6 @@ const RouteMap: React.FC<RouteMapProps> = ({
   const [errorType, setErrorType] = useState<'permission' | 'unavailable' | 'timeout' | 'other' | null>(null);
   const [hasLocationPermission, setHasLocationPermission] = useState(!!providedCurrentLocation);
 
-  // Check iOS location permission status
-  const checkIOSPermission = async () => {
-    try {
-      // On iOS, we can check permission status by attempting to get location
-      // If permission is denied, the error callback will handle it
-      return true;
-    } catch (err) {
-      return false;
-    }
-  };
-
   // Open device settings
   const openSettings = () => {
     if (Platform.OS === 'ios') {
@@ -89,39 +71,15 @@ const RouteMap: React.FC<RouteMapProps> = ({
   // Request location permission
   const requestLocationPermission = async () => {
     try {
-      if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: 'Location Permission',
-            message: 'This app needs access to your location to show the route to your delivery address.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-        setHasLocationPermission(granted === PermissionsAndroid.RESULTS.GRANTED);
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          getCurrentLocation();
-        } else if (granted === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
-          setErrorType('permission');
-          setError('Location permission denied. Please enable it in Settings.');
-          setLoading(false);
-        } else {
-          setErrorType('permission');
-          setError('Location permission denied');
-          setLoading(false);
-        }
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        setHasLocationPermission(true);
+        getCurrentLocation();
       } else {
-        // iOS - permissions are handled via Info.plist
-        // Check permission first, then attempt to get location
-        const hasPermission = await checkIOSPermission();
-        if (hasPermission) {
-          getCurrentLocation();
-        } else {
-          // Will be handled by error callback
-          getCurrentLocation();
-        }
+        setHasLocationPermission(false);
+        setErrorType('permission');
+        setError('Location permission denied. Please enable it in Settings.');
+        setLoading(false);
       }
     } catch (err) {
       console.error('Error requesting location permission:', err);
@@ -150,62 +108,48 @@ const RouteMap: React.FC<RouteMapProps> = ({
   }, []);
 
   // Get current location with improved error handling
-  const getCurrentLocation = () => {
+  const getCurrentLocation = async () => {
     setLoading(true);
     setError(null);
     setErrorType(null);
 
-    Geolocation.getCurrentPosition(
-      (position) => {
-        const location: Location = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        };
-        setCurrentLocation(location);
-        setHasLocationPermission(true);
-        initializeMap(location);
-      },
-      (error: GeolocationError) => {
-        console.error('Error getting location:', error);
-        
-        // Handle specific error codes
-        const errorCode = error.code;
-        
-        if (errorCode === 1 || errorCode === error.PERMISSION_DENIED) {
-          // PERMISSION_DENIED
-          setErrorType('permission');
-          setError('Location permission denied');
-        } else if (errorCode === 2 || errorCode === error.POSITION_UNAVAILABLE) {
-          // POSITION_UNAVAILABLE
-          setErrorType('unavailable');
-          setError('Location information is unavailable');
-        } else if (errorCode === 3 || errorCode === error.TIMEOUT) {
-          // TIMEOUT
-          setErrorType('timeout');
-          setError('Location request timed out');
-        } else {
-          // Other errors
-          setErrorType('other');
-          setError('Failed to get current location');
-        }
-        
-        setLoading(false);
-      },
-      { 
-        enableHighAccuracy: true, 
-        timeout: 15000, 
-        maximumAge: 10000 
+    try {
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+      
+      const locationData: Location = {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      };
+      setCurrentLocation(locationData);
+      setHasLocationPermission(true);
+      initializeMap(locationData);
+    } catch (error: any) {
+      console.error('Error getting location:', error);
+      
+      // Handle specific error types
+      if (error.code === 'E_LOCATION_UNAVAILABLE') {
+        setErrorType('unavailable');
+        setError('Location information is unavailable');
+      } else if (error.code === 'E_LOCATION_TIMEOUT') {
+        setErrorType('timeout');
+        setError('Location request timed out');
+      } else if (error.code === 'E_LOCATION_PERMISSION_DENIED') {
+        setErrorType('permission');
+        setError('Location permission denied');
+      } else {
+        setErrorType('other');
+        setError('Failed to get current location');
       }
-    );
+      
+      setLoading(false);
+    }
   };
 
   // Retry getting location
-  const handleRetry = () => {
-    if (Platform.OS === 'android') {
-      requestLocationPermission();
-    } else {
-      getCurrentLocation();
-    }
+  const handleRetry = async () => {
+    await requestLocationPermission();
   };
 
   // Geocode delivery address to coordinates

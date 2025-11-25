@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Image, ImageSourcePropType } from 'react-native';
 import Text from '../common/Text';
-import { scale, getSpacing } from '../utils/responsive';
+import { scale, getSpacing } from '../../utils/responsive';
 
 interface WhyMoringaSectionProps {
   title?: string;

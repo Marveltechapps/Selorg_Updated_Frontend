@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Text, Image, ImageSourcePropType } from 'react-native';
-import { scale, getSpacing } from '../utils/responsive';
+import { scale, getSpacing } from '../../utils/responsive';
 
 interface OrganicTaglineSectionProps {
   icon?: ImageSourcePropType;

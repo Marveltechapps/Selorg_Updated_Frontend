@@ -15,9 +15,9 @@ import SearchIcon from '../components/icons/SearchIcon';
 import Text from '../components/common/Text';
 import SubCategoryItem from '../components/SubCategoryItem';
 import CategoryBanner from '../components/CategoryBanner';
-import ProductCard, { Product } from '../components/ProductCard';
-import FloatingCartBar from '../components/FloatingCartBar';
-import ProductVariantModal, { ProductVariant } from '../components/ProductVariantModal';
+import ProductCard, { Product } from '../components/features/product/ProductCard';
+import FloatingCartBar from '../components/features/cart/FloatingCartBar';
+import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
 import { useCart } from '../contexts/CartContext';
 import { useDimensions, getSpacing, scale } from '../utils/responsive';
 

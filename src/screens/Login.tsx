@@ -656,7 +656,7 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'ios' && {
       paddingTop: 0,
       paddingBottom: 0,
-      height: scale(20),
+      height: scale(18),
     }),
   },
   noteText: {

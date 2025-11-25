@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
-import type { RootStackNavigationProp } from '../types/navigation';
+import LinearGradient from 'expo-linear-gradient';
+import type { RootStackNavigationProp } from '../../types/navigation';
 import Text from '../common/Text';
-import CategoryCard from './CategoryCard';
+import CategoryCard from '../CategoryCard';
 
 interface Category {
   id: string;
