@@ -12,7 +12,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RootStackNavigationProp, RootStackRouteProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import SearchIcon from '../components/icons/SearchIcon';
-import Text from '../components/Text';
+import Text from '../components/common/Text';
 import SubCategoryItem from '../components/SubCategoryItem';
 import CategoryBanner from '../components/CategoryBanner';
 import ProductCard, { Product } from '../components/ProductCard';

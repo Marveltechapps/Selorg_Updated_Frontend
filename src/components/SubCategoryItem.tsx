@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image, ImageSourcePropType, Platform } from 'react-native';
-import Text from './Text';
+import Text from './common/Text';
 import { scale, scaleFont, getSpacing, getBorderRadius, useDimensions } from '../utils/responsive';
 
 interface SubCategoryItemProps {

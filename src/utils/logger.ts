@@ -3,7 +3,7 @@
  * Centralized logging with environment-aware levels
  */
 
-import { envConfig } from '../config/env';
+import { getEnvConfigSafe } from '../config/env';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -16,7 +16,12 @@ interface LogEntry {
 
 class Logger {
   private shouldLog(): boolean {
-    return envConfig.enableLogging || __DEV__;
+    try {
+      return getEnvConfigSafe().enableLogging || __DEV__;
+    } catch (error) {
+      // Default to logging in dev mode if config fails
+      return __DEV__;
+    }
   }
 
   private formatMessage(level: LogLevel, message: string, data?: any): string {
@@ -53,9 +58,13 @@ class Logger {
     }
 
     // In production, you might want to send logs to a service
-    if (envConfig.enableAnalytics && level === 'error') {
-      // Send to error tracking service (e.g., Sentry)
-      // This will be implemented when monitoring is set up
+    try {
+      if (getEnvConfigSafe().enableAnalytics && level === 'error') {
+        // Send to error tracking service (e.g., Sentry)
+        // This will be implemented when monitoring is set up
+      }
+    } catch (error) {
+      // Silently fail if config is unavailable
     }
   }
 

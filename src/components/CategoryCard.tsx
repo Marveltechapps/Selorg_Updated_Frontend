@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image, ImageSourcePropType, Animated, Easing } from 'react-native';
-import Text from './Text';
+import Text from './common/Text';
 
 interface CategoryCardProps {
   image: ImageSourcePropType;

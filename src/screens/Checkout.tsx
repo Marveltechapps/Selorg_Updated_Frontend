@@ -35,10 +35,10 @@ import {
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect, useRoute, useIsFocused } from '@react-navigation/native';
-import Header from '../components/Header';
-import CartItem, { CartItemData } from '../components/CartItem';
-import BillSummary, { BillSummaryData } from '../components/BillSummary';
-import DeliveryAddressCard from '../components/DeliveryAddressCard';
+import Header from '../components/layout/Header';
+import CartItem, { CartItemData } from '../components/features/cart/CartItem';
+import BillSummary, { BillSummaryData } from '../components/features/cart/BillSummary';
+import DeliveryAddressCard from '../components/features/order/DeliveryAddressCard';
 import { useCart, CartItem as CartContextItem } from '../contexts/CartContext';
 import ShopIcon from '../components/icons/ShopIcon';
 import ChevronDownIcon from '../assets/images/chevron-down.svg';

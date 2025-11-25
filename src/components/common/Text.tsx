@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text as RNText, StyleSheet, TextStyle, TextProps } from 'react-native';
-import { Theme } from '../constants/Theme';
+import { Theme } from '../../constants/Theme';
 
 interface CustomTextProps extends TextProps {
   variant?: 'h1' | 'h2' | 'h3' | 'body' | 'bodySmall' | 'caption';

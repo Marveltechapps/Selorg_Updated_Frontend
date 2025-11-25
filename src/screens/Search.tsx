@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
-import Text from '../components/Text';
+import Text from '../components/common/Text';
 import SearchSuggestionItem from '../components/SearchSuggestionItem';
 
 // Dummy static data - ready for API replacement

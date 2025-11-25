@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { RootStackNavigationProp } from '../types/navigation';
-import SearchIcon from './icons/SearchIcon';
+import type { RootStackNavigationProp } from '../../../types/navigation';
+import SearchIcon from '../../icons/SearchIcon';
 
 interface SearchBarProps {
   placeholder?: string;

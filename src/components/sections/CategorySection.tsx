@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import type { RootStackNavigationProp } from '../types/navigation';
-import Text from './Text';
+import Text from '../common/Text';
 import CategoryCard from './CategoryCard';
 
 interface Category {

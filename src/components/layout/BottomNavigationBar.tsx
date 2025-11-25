@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, StyleSheet, Text, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import HomeFilledIcon from './icons/HomeFilledIcon';
-import HomeOutlinedIcon from './icons/HomeOutlinedIcon';
-import ShopFilledIcon from './icons/ShopFilledIcon';
-import ShopOutlinedIcon from './icons/ShopOutlinedIcon';
-import CartFilledIcon from './icons/CartFilledIcon';
-import CartOutlinedIcon from './icons/CartOutlinedIcon';
+import HomeFilledIcon from '../icons/HomeFilledIcon';
+import HomeOutlinedIcon from '../icons/HomeOutlinedIcon';
+import ShopFilledIcon from '../icons/ShopFilledIcon';
+import ShopOutlinedIcon from '../icons/ShopOutlinedIcon';
+import CartFilledIcon from '../icons/CartFilledIcon';
+import CartOutlinedIcon from '../icons/CartOutlinedIcon';
 
 interface BottomNavigationBarProps {
   activeTab?: 'home' | 'shop' | 'cart';

@@ -9,31 +9,31 @@ import NoInternet from '../screens/NoInternet';
 import Login from '../screens/Login';
 
 // Lazy load other screens for better performance
-const Onboarding = React.lazy(() => import('../screens/onboarding/Onboarding'));
-const OTPVerification = React.lazy(() => import('../screens/auth/OTPVerification'));
-const VerificationSuccess = React.lazy(() => import('../screens/auth/VerificationSuccess'));
+const Onboarding = React.lazy(() => import('../screens/Onboarding'));
+const OTPVerification = React.lazy(() => import('../screens/OTPVerification'));
+const VerificationSuccess = React.lazy(() => import('../screens/VerificationSuccess'));
 const MainTabNavigator = React.lazy(() => import('./MainTabNavigator'));
-const OrderStatusStack = React.lazy(() => import('./stacks/OrderStatusStack'));
-const Settings = React.lazy(() => import('../screens/profile/Settings'));
-const OrdersStack = React.lazy(() => import('./stacks/OrdersStack'));
-const CustomerSupportStack = React.lazy(() => import('./stacks/CustomerSupportStack'));
-const LocationStack = React.lazy(() => import('./stacks/LocationStack'));
-const RefundsStack = React.lazy(() => import('./stacks/RefundsStack'));
-const Profile = React.lazy(() => import('../screens/profile/Profile'));
-const PaymentManagement = React.lazy(() => import('../screens/profile/PaymentManagement'));
-const GeneralInfoStack = React.lazy(() => import('./stacks/GeneralInfoStack'));
-const Notifications = React.lazy(() => import('../screens/common/Notifications'));
-const Checkout = React.lazy(() => import('../screens/cart/Checkout'));
-const Coupons = React.lazy(() => import('../screens/cart/Coupons'));
-const Home = React.lazy(() => import('../screens/home/Home'));
-const Category = React.lazy(() => import('../screens/products/Category'));
-const Search = React.lazy(() => import('../screens/common/Search'));
-const SearchResults = React.lazy(() => import('../screens/common/SearchResults'));
-const ProductDetail = React.lazy(() => import('../screens/products/ProductDetail'));
-const CategoryProducts = React.lazy(() => import('../screens/products/CategoryProducts'));
-const BannerDetail = React.lazy(() => import('../screens/products/BannerDetail'));
-const TinyTimmies = React.lazy(() => import('../screens/products/TinyTimmies'));
-const CategoriesExpo = React.lazy(() => import('../screens/products/CategoriesExpo'));
+const OrderStatusStack = React.lazy(() => import('./OrderStatusStack'));
+const Settings = React.lazy(() => import('../screens/Settings'));
+const OrdersStack = React.lazy(() => import('./OrdersStack'));
+const CustomerSupportStack = React.lazy(() => import('./CustomerSupportStack'));
+const LocationStack = React.lazy(() => import('./LocationStack'));
+const RefundsStack = React.lazy(() => import('./RefundsStack'));
+const Profile = React.lazy(() => import('../screens/Profile'));
+const PaymentManagement = React.lazy(() => import('../screens/PaymentManagement'));
+const GeneralInfoStack = React.lazy(() => import('./GeneralInfoStack'));
+const Notifications = React.lazy(() => import('../screens/Notifications'));
+const Checkout = React.lazy(() => import('../screens/Checkout'));
+const Coupons = React.lazy(() => import('../screens/Coupons'));
+const Home = React.lazy(() => import('../screens/Home'));
+const Category = React.lazy(() => import('../screens/Category'));
+const Search = React.lazy(() => import('../screens/Search'));
+const SearchResults = React.lazy(() => import('../screens/SearchResults'));
+const ProductDetail = React.lazy(() => import('../screens/ProductDetail'));
+const CategoryProducts = React.lazy(() => import('../screens/CategoryProducts'));
+const BannerDetail = React.lazy(() => import('../screens/BannerDetail'));
+const TinyTimmies = React.lazy(() => import('../screens/TinyTimmies'));
+const CategoriesExpo = React.lazy(() => import('../screens/CategoriesExpo'));
 
 // Loading fallback component
 const LoadingFallback = () => (

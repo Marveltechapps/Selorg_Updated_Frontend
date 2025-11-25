@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import Text from './Text';
-import LocationArrowIcon from './icons/LocationArrowIcon';
+import Text from '../../common/Text';
+import LocationArrowIcon from '../../icons/LocationArrowIcon';
 
 interface LocationSelectorProps {
   deliveryType: string;

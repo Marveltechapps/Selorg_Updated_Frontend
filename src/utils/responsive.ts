@@ -3,6 +3,7 @@
  * Screen size and responsive design helpers
  */
 
+import React from 'react';
 import { Dimensions, PixelRatio } from 'react-native';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -61,4 +62,74 @@ export const isSmallScreen = (): boolean => {
  */
 export const getPixelRatio = (): number => {
   return PixelRatio.get();
+};
+
+/**
+ * Alias for getScreenDimensions for backward compatibility
+ */
+export const getWindowDimensions = getScreenDimensions;
+
+/**
+ * Get spacing using scale function (alias for scale)
+ */
+export const getSpacing = scale;
+
+/**
+ * Width percentage helper
+ */
+export const wp = (percentage: number): number => {
+  return (SCREEN_WIDTH * percentage) / 100;
+};
+
+/**
+ * Height percentage helper
+ */
+export const hp = (percentage: number): number => {
+  return (SCREEN_HEIGHT * percentage) / 100;
+};
+
+/**
+ * Scale font size
+ */
+export const scaleFont = (size: number): number => {
+  return scale(size);
+};
+
+/**
+ * Get card width helper
+ */
+export const getCardWidth = (cardsPerRow: number = 2, gap: number = 12, padding: number = 16): number => {
+  const containerPadding = padding * 2;
+  const gaps = (cardsPerRow - 1) * gap;
+  return (SCREEN_WIDTH - containerPadding - gaps) / cardsPerRow;
+};
+
+/**
+ * Get border radius helper
+ */
+export const getBorderRadius = (size: number): number => {
+  return scale(size);
+};
+
+/**
+ * Hook to get dimensions
+ */
+export const useDimensions = () => {
+  const [dimensions, setDimensions] = React.useState({
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
+  });
+
+  React.useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', ({ window }) => {
+      setDimensions({
+        width: window.width,
+        height: window.height,
+      });
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  return dimensions;
 };

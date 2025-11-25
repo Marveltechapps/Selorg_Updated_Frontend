@@ -3,7 +3,7 @@ import { View, StyleSheet, StatusBar, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
-import Text from '../components/Text';
+import Text from '../components/common/Text';
 import VerificationCheckIcon from '../components/icons/VerificationCheckIcon';
 
 const VerificationSuccess: React.FC = () => {

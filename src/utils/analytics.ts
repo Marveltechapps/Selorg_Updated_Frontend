@@ -3,7 +3,7 @@
  * Wrapper for analytics tracking
  */
 
-import { envConfig } from '../config/env';
+import { getEnvConfigSafe } from '../config/env';
 import { logger } from './logger';
 
 type AnalyticsEvent = {
@@ -15,7 +15,12 @@ class Analytics {
   private enabled: boolean;
 
   constructor() {
-    this.enabled = envConfig.enableAnalytics;
+    try {
+      this.enabled = getEnvConfigSafe().enableAnalytics;
+    } catch (error) {
+      console.warn('Error getting analytics config, defaulting to enabled:', error);
+      this.enabled = true;
+    }
   }
 
   /**

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import BackButton from '../components/BackButton';
-import Text from '../components/Text';
+import Text from '../components/common/Text';
 import OrderCard from '../components/OrderCard';
 import { Theme } from '../constants/Theme';
 

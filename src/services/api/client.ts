@@ -7,12 +7,17 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { requestInterceptor, responseInterceptor } from './interceptors';
 import type { ApiResponse, RequestConfig } from './types';
 
-import { envConfig } from '../../config/env';
+import { getEnvConfigSafe } from '../../config/env';
 import { tokenManager } from './tokenManager';
 
 // Base URL from environment config
 const getBaseURL = (): string => {
-  return envConfig.apiBaseUrl;
+  try {
+    return getEnvConfigSafe().apiBaseUrl;
+  } catch (error) {
+    console.error('Error getting base URL, using default:', error);
+    return 'https://api.example.com';
+  }
 };
 
 /**

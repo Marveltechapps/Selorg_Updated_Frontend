@@ -5,11 +5,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RootStackNavigationProp, RootStackRouteProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import SearchIcon from '../components/icons/SearchIcon';
-import Text from '../components/Text';
-import BannerProductCard, { BannerProduct } from '../components/BannerProductCard';
-import WhyMoringaSection from '../components/WhyMoringaSection';
-import ProductVariantModal, { ProductVariant } from '../components/ProductVariantModal';
-import FloatingCartBar from '../components/FloatingCartBar';
+import Text from '../components/common/Text';
+import BannerProductCard, { BannerProduct } from '../components/features/product/BannerProductCard';
+import WhyMoringaSection from '../components/sections/WhyMoringaSection';
+import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
+import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 import { useCart } from '../contexts/CartContext';
 import { useDimensions, getSpacing } from '../utils/responsive';
 
