@@ -1,0 +1,176 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { View, StyleSheet, Image, ImageSourcePropType, ScrollView, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { RootStackNavigationProp } from '../types/navigation';
+import { getWindowDimensions } from '../utils/responsive';
+
+// Placeholder image - will be replaced when actual image is downloaded from Figma
+const PLACEHOLDER_IMAGE = require('../assets/images/banner.png');
+
+// Dummy static data - ready for API replacement
+const DUMMY_BANNERS: ImageSourcePropType[] = [
+  PLACEHOLDER_IMAGE,
+  PLACEHOLDER_IMAGE,
+  PLACEHOLDER_IMAGE,
+];
+
+interface BannerProps {
+  banners?: ImageSourcePropType[];
+  image?: ImageSourcePropType;
+  onPress?: (index: number) => void;
+  fetchBannerData?: () => Promise<ImageSourcePropType[]>;
+}
+
+export default function Banner({
+  banners,
+  image,
+  onPress,
+  fetchBannerData,
+}: BannerProps) {
+  const navigation = useNavigation<RootStackNavigationProp>();
+  // If single image is provided, convert to array
+  const initialBanners = image ? [image] : (banners || DUMMY_BANNERS);
+  
+  const [bannerImages, setBannerImages] = useState<ImageSourcePropType[]>(initialBanners);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const scrollViewRef = useRef<ScrollView>(null);
+  
+  // Responsive banner width - account for container padding (16px on each side)
+  const bannerWidth = useMemo(() => {
+    const screenWidth = getWindowDimensions().width;
+    const containerPadding = 16 * 2; // 16px padding on each side
+    return screenWidth - containerPadding;
+  }, []);
+
+  // Placeholder for API integration
+  useEffect(() => {
+    if (fetchBannerData) {
+      const loadBanners = async () => {
+        setLoading(true);
+        try {
+          const data = await fetchBannerData();
+          setBannerImages(data);
+        } catch (error) {
+          console.error('Error fetching banner data:', error);
+          // Fallback to provided banners or dummy data
+          setBannerImages(banners || (image ? [image] : DUMMY_BANNERS));
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadBanners();
+    }
+  }, [fetchBannerData, banners, image]);
+
+  const handleScroll = (event: any) => {
+    const scrollPosition = event.nativeEvent.contentOffset.x;
+    const width = bannerWidth;
+    const index = Math.round(scrollPosition / width);
+    setCurrentIndex(index);
+  };
+
+  const handlePress = (index: number) => {
+    if (onPress) {
+      onPress(index);
+    } else {
+      // Navigate to banner detail screen
+      navigation.navigate('BannerDetail', { title: 'Banner' });
+    }
+  };
+
+  // Ensure banner images exist
+  if (!bannerImages || bannerImages.length === 0) {
+    return null;
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Banner Image Carousel */}
+      <ScrollView
+        ref={scrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        style={[styles.scrollView, { width: bannerWidth }]}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {bannerImages.map((banner, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[styles.imageContainer, { width: bannerWidth }]}
+            onPress={() => handlePress(index)}
+            activeOpacity={0.9}
+          >
+            <Image
+              source={banner}
+              style={styles.bannerImage}
+              resizeMode="cover"
+            />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Dot Indicators */}
+      {bannerImages.length > 1 && (
+        <View style={styles.dotsContainer}>
+          {bannerImages.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                index === currentIndex ? styles.activeDot : styles.inactiveDot,
+              ]}
+            />
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    gap: 12,
+  },
+  scrollView: {
+    width: '100%',
+  },
+  scrollContent: {
+    alignItems: 'center',
+  },
+  imageContainer: {
+    height: 272,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 4,
+    width: '100%',
+    paddingHorizontal: 16,
+  },
+  dot: {
+    borderRadius: 4,
+  },
+  activeDot: {
+    width: 16,
+    height: 8,
+    backgroundColor: '#034703',
+  },
+  inactiveDot: {
+    width: 8,
+    height: 8,
+    backgroundColor: '#BABABA',
+  },
+});

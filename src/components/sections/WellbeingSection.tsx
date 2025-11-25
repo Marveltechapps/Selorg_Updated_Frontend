@@ -1,0 +1,241 @@
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Image, ImageSourcePropType } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+import type { RootStackNavigationProp } from '../types/navigation';
+import Text from './Text';
+import WellbeingCard, { WellbeingProduct } from './WellbeingCard';
+
+// Dummy static data - ready for API replacement
+const DUMMY_PRODUCTS: WellbeingProduct[] = [
+  {
+    id: '1',
+    name: 'Tiny Tummies',
+    description: 'Wholesome bites for growing champs',
+    image: require('../assets/images/wellbeing/tiny-tummies.png'),
+  },
+  {
+    id: '2',
+    name: 'Adult Well-being',
+    description: 'Power your hustle\nwith clean eats',
+    image: require('../assets/images/wellbeing/adult-wellbeing.png'),
+  },
+  {
+    id: '3',
+    name: 'For Her',
+    description: 'Balanced. Nourishing. Empowered',
+    image: require('../assets/images/wellbeing/for-her.png'),
+  },
+  {
+    id: '4',
+    name: 'Golden Years',
+    description: 'Soft, safe &\nsoul-soothing foods',
+    image: require('../assets/images/wellbeing/golden-years.png'),
+  },
+];
+
+interface WellbeingSectionProps {
+  onProductPress?: (productId: string) => void;
+  fetchProducts?: () => Promise<WellbeingProduct[]>;
+  starsImage?: ImageSourcePropType;
+}
+
+export default function WellbeingSection({ 
+  onProductPress, 
+  fetchProducts,
+  starsImage 
+}: WellbeingSectionProps) {
+  const navigation = useNavigation<RootStackNavigationProp>();
+  const [products, setProducts] = useState<WellbeingProduct[]>(DUMMY_PRODUCTS);
+  const [loading, setLoading] = useState(false);
+
+  const stars = starsImage || require('../assets/images/wellbeing/stars.png');
+
+  // Placeholder for API integration
+  useEffect(() => {
+    if (fetchProducts) {
+      const loadProducts = async () => {
+        setLoading(true);
+        try {
+          const data = await fetchProducts();
+          setProducts(data);
+        } catch (error) {
+          console.error('Error fetching wellbeing products:', error);
+          // Fallback to dummy data on error
+          setProducts(DUMMY_PRODUCTS);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadProducts();
+    }
+  }, [fetchProducts]);
+
+  const handleProductPress = (productId: string) => {
+    if (onProductPress) {
+      onProductPress(productId);
+    } else {
+      // Navigate to tiny-timmies page when "Tiny Tummies" is clicked
+      const product = products.find(p => p.id === productId);
+      if (product && product.name === 'Tiny Tummies') {
+        navigation.navigate('TinyTimmies');
+      } else {
+        console.log('Wellbeing product pressed:', productId);
+      }
+    }
+  };
+
+  // Group products into rows of 2
+  const rows: WellbeingProduct[][] = [];
+  for (let i = 0; i < products.length; i += 2) {
+    rows.push(products.slice(i, i + 2));
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.headerContainer}>
+        {/* Stars Image - Positioned absolutely */}
+        <View style={styles.starsContainer}>
+          <Image source={stars} style={styles.starsImage} resizeMode="contain" />
+        </View>
+
+        <View style={styles.subtitleContainer}>
+          {/* Title */}
+          <Text style={styles.title}>Designed for Well-being</Text>
+
+          {/* Divider with Tag */}
+          <View style={styles.dividerContainer}>
+            <LinearGradient
+              colors={['rgba(182, 49, 158, 1)', 'rgba(252, 223, 247, 1)']}
+              start={{ x: 1, y: 0 }}
+              end={{ x: 0, y: 0 }}
+              style={styles.dividerLine}
+            />
+            <View style={styles.tagContainer}>
+              <Text style={styles.tagText}>Just for you </Text>
+            </View>
+            <LinearGradient
+              colors={['rgba(182, 49, 158, 1)', 'rgba(252, 223, 247, 1)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.dividerLine}
+            />
+          </View>
+        </View>
+      </View>
+
+      {/* Product Grid - 2 columns x 2 rows */}
+      <View style={styles.productsContainer}>
+        {rows.map((row, rowIndex) => (
+          <View key={rowIndex} style={styles.productRow}>
+            {row.map((product) => (
+              <WellbeingCard
+                key={product.id}
+                product={product}
+                onPress={handleProductPress}
+              />
+            ))}
+            {/* Fill remaining slot if row has less than 2 items */}
+            {row.length < 2 && (
+              <View style={styles.spacer} />
+            )}
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    gap: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    backgroundColor: '#F9D9F3',
+  },
+  headerContainer: {
+    width: 295,
+    height: 64,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    position: 'relative',
+  },
+  subtitleContainer: {
+    alignItems: 'center',
+    gap: 8,
+    width: 295,
+    marginTop: 11,
+  },
+  starsContainer: {
+    width: 270,
+    height: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    top: 0,
+    left: 13,
+  },
+  starsImage: {
+    width: 270,
+    height: 35,
+  },
+  title: {
+    fontFamily: 'Inter',
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 24.2,
+    color: '#000000',
+    textAlign: 'center',
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    gap: 8,
+  },
+  dividerLine: {
+    width: 77,
+    height: 1,
+    flex: 1,
+    maxWidth: 77,
+  },
+  tagContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#B6319E',
+    borderRadius: 50,
+    paddingVertical: 0,
+    paddingHorizontal: 10,
+    width: 108,
+    height: 21,
+  },
+  tagText: {
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 14.52,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
+  productsContainer: {
+    gap: 0,
+    width: '100%',
+    alignItems: 'center',
+  },
+  productRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 24,
+    width: '100%',
+    marginBottom: 0,
+    justifyContent: 'center',
+  },
+  spacer: {
+    width: 155,
+  },
+});
+
