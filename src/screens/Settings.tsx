@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
-import Header from '../components/Header';
+import Header from '../components/layout/Header';
 import ChevronRightIcon from '../assets/images/chevron-right.svg';
 import OrdersIcon from '../assets/images/orders-icon.svg';
 import CustomerSupportIcon from '../assets/images/customer-support-icon.svg';

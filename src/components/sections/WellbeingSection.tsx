@@ -3,7 +3,7 @@ import { View, StyleSheet, Image, ImageSourcePropType } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
-import Text from './Text';
+import Text from '../common/Text';
 import WellbeingCard, { WellbeingProduct } from './WellbeingCard';
 
 // Dummy static data - ready for API replacement

@@ -3,20 +3,20 @@ import { View, StyleSheet, StatusBar, Platform, Text, ScrollView, Animated, Nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
-import TopSection from '../components/TopSection';
-import VideoSection from '../components/VideoSection';
-import CategorySection from '../components/CategorySection';
-import Banner from '../components/Banner';
-import DealsSection from '../components/DealsSection';
-import WellbeingSection from '../components/WellbeingSection';
-import GreensBanner from '../components/GreensBanner';
-import SectionImage from '../components/SectionImage';
-import LifestyleSection from '../components/LifestyleSection';
-import NewDealsSection from '../components/NewDealsSection';
-import FreshJuiceDealsSection from '../components/FreshJuiceDealsSection';
-import BannerSection from '../components/BannerSection';
-import OrganicTaglineSection from '../components/OrganicTaglineSection';
-import FloatingCartBar from '../components/FloatingCartBar';
+import TopSection from '../components/layout/TopSection';
+import VideoSection from '../components/sections/VideoSection';
+import CategorySection from '../components/sections/CategorySection';
+import Banner from '../components/features/banner/Banner';
+import DealsSection from '../components/sections/DealsSection';
+import WellbeingSection from '../components/sections/WellbeingSection';
+import GreensBanner from '../components/common/GreensBanner';
+import SectionImage from '../components/common/SectionImage';
+import LifestyleSection from '../components/sections/LifestyleSection';
+import NewDealsSection from '../components/sections/NewDealsSection';
+import FreshJuiceDealsSection from '../components/sections/FreshJuiceDealsSection';
+import BannerSection from '../components/sections/BannerSection';
+import OrganicTaglineSection from '../components/sections/OrganicTaglineSection';
+import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 
 // Number of sections to animate (excluding TopSection which is already animated)
 const SECTION_COUNT = 12;

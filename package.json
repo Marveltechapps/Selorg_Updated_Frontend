@@ -24,6 +24,7 @@
     "@react-navigation/native-stack": "^6.9.17",
     "react": "19.1.1",
     "react-native": "0.82.1",
+    "react-native-config": "^1.6.0",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-maps": "^1.18.0",
     "react-native-maps-directions": "^1.8.0",

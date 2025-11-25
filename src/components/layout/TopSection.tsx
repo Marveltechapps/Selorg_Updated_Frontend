@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import LocationSelector from './LocationSelector';
-import SearchBar from './SearchBar';
-import ProfileIconHome from './icons/ProfileIconHome';
-import MuteIcon from './icons/MuteIcon';
-import UnmuteIcon from './icons/UnmuteIcon';
+import LocationSelector from '../features/location/LocationSelector';
+import SearchBar from '../features/search/SearchBar';
+import ProfileIconHome from '../icons/ProfileIconHome';
+import MuteIcon from '../icons/MuteIcon';
+import UnmuteIcon from '../icons/UnmuteIcon';
 import { TouchableOpacity } from 'react-native';
 import { useDimensions, scale, getSpacing, wp, hp } from '../utils/responsive';
 

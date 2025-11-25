@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import Text from './Text';
+import Text from '../../common/Text';
 
 interface SearchSuggestionItemProps {
   id: string;

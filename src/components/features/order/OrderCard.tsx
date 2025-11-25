@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import Text from './Text';
-import { Theme } from '../constants/Theme';
-import CheckIcon from './icons/CheckIcon';
-import CancelIcon from './icons/CancelIcon';
-import ChevronRightIcon from './icons/ChevronRightIcon';
+import Text from '../../common/Text';
+import { Theme } from '../../../constants/Theme';
+import CheckIcon from '../../icons/CheckIcon';
+import CancelIcon from '../../icons/CancelIcon';
+import ChevronRightIcon from '../../icons/ChevronRightIcon';
 
 interface Order {
   id: string;

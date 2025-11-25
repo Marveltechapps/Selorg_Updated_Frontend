@@ -6,12 +6,12 @@ import LinearGradient from 'react-native-linear-gradient';
 import type { RootStackNavigationProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import SearchIcon from '../components/icons/SearchIcon';
-import Text from '../components/Text';
-import BannerProductCard, { BannerProduct } from '../components/BannerProductCard';
+import Text from '../components/common/Text';
+import BannerProductCard, { BannerProduct } from '../components/features/product/BannerProductCard';
 import TinyTummiesCategoryCard, { TinyTummiesCategory } from '../components/TinyTummiesCategoryCard';
-import ProductVariantModal, { ProductVariant } from '../components/ProductVariantModal';
-import FloatingCartBar from '../components/FloatingCartBar';
-import DealsSection from '../components/DealsSection';
+import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
+import FloatingCartBar from '../components/features/cart/FloatingCartBar';
+import DealsSection from '../components/sections/DealsSection';
 import { useCart } from '../contexts/CartContext';
 import { useDimensions, scale, scaleFont, getSpacing, getBorderRadius, wp } from '../utils/responsive';
 

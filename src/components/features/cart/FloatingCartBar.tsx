@@ -2,10 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Image, ImageSourcePropType, Animated, Easing } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { RootStackNavigationProp } from '../types/navigation';
-import Text from './Text';
-import { useCart } from '../contexts/CartContext';
-import ChevronRightIcon from './icons/ChevronRightIcon';
+import type { RootStackNavigationProp } from '../../../types/navigation';
+import Text from '../../common/Text';
+import { useCart } from '../../../contexts/CartContext';
+import ChevronRightIcon from '../../icons/ChevronRightIcon';
 
 interface FloatingCartBarProps {
   onPress?: () => void;

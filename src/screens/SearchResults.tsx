@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RootStackNavigationProp, RootStackRouteProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
-import Text from '../components/Text';
+import Text from '../components/common/Text';
 import ProductCard, { Product } from '../components/ProductCard';
 import ProductVariantModal, { ProductVariant } from '../components/ProductVariantModal';
 import { useCart } from '../contexts/CartContext';

@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
-import Text from './Text';
-import RupeeIcon from './icons/RupeeIcon';
-import DropdownArrowIcon from './icons/DropdownArrowIcon';
-import PlusIcon from './icons/PlusIcon';
-import MinusIcon from './icons/MinusIcon';
-import { useCart } from '../contexts/CartContext';
-import { useDimensions, scale, scaleFont, getSpacing, getCardWidth } from '../utils/responsive';
+import Text from '../../common/Text';
+import RupeeIcon from '../../icons/RupeeIcon';
+import DropdownArrowIcon from '../../icons/DropdownArrowIcon';
+import PlusIcon from '../../icons/PlusIcon';
+import MinusIcon from '../../icons/MinusIcon';
+import { useCart } from '../../../contexts/CartContext';
+import { useDimensions, scale, scaleFont, getSpacing, getCardWidth } from '../../../utils/responsive';
 
 export interface BannerProduct {
   id: string;

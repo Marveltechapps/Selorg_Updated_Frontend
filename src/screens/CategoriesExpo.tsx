@@ -5,7 +5,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import type { RootStackNavigationProp } from '../types/navigation';
 import SearchIcon from '../components/icons/SearchIcon';
-import Text from '../components/Text';
+import Text from '../components/common/Text';
 import CategoryCard from '../components/CategoryCard';
 import FloatingCartBar from '../components/FloatingCartBar';
 import { useDimensions, getSpacing, scale } from '../utils/responsive';

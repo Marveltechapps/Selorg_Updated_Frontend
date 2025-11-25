@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, FlatList } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Text from './Text';
+import Text from '../common/Text';
 import ProductCard, { Product } from './ProductCard';
 import ProductVariantModal, { ProductVariant } from './ProductVariantModal';
 import { useCart } from '../contexts/CartContext';

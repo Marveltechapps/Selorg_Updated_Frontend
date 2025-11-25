@@ -1,13 +1,13 @@
 import React from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { RootStackNavigationProp } from '../types/navigation';
-import Text from './Text';
-import RupeeIcon from './icons/RupeeIcon';
-import PlusIcon from './icons/PlusIcon';
-import MinusIcon from './icons/MinusIcon';
-import DropdownArrowIcon from './icons/DropdownArrowIcon';
-import { useCart } from '../contexts/CartContext';
+import type { RootStackNavigationProp } from '../../../types/navigation';
+import Text from '../../common/Text';
+import RupeeIcon from '../../icons/RupeeIcon';
+import PlusIcon from '../../icons/PlusIcon';
+import MinusIcon from '../../icons/MinusIcon';
+import DropdownArrowIcon from '../../icons/DropdownArrowIcon';
+import { useCart } from '../../../contexts/CartContext';
 
 export interface Product {
   id: string;

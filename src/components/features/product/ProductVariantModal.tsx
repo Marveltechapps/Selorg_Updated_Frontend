@@ -11,12 +11,12 @@ import {
   ScrollView,
   ImageURISource,
 } from 'react-native';
-import Text from './Text';
-import RupeeIcon from './icons/RupeeIcon';
-import CloseIcon from './icons/CloseIcon';
-import PlusIcon from './icons/PlusIcon';
-import MinusIcon from './icons/MinusIcon';
-import { useCart } from '../contexts/CartContext';
+import Text from '../../common/Text';
+import RupeeIcon from '../../icons/RupeeIcon';
+import CloseIcon from '../../icons/CloseIcon';
+import PlusIcon from '../../icons/PlusIcon';
+import MinusIcon from '../../icons/MinusIcon';
+import { useCart } from '../../../contexts/CartContext';
 
 export interface ProductVariant {
   id: string;
