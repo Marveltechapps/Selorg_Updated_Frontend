@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import ChevronRightIcon from '../assets/images/chevron-right.svg';
+import { logger } from '@/utils/logger';
 import OrdersIcon from '../assets/images/orders-icon.svg';
 import CustomerSupportIcon from '../assets/images/customer-support-icon.svg';
 import AddressesIcon from '../assets/images/addresses-icon.svg';
@@ -73,7 +74,7 @@ const Settings: React.FC<SettingsProps> = ({ onLogout }) => {
         navigation.navigate('Notifications');
         break;
       default:
-        console.log('Unknown item:', itemId);
+        logger.info('Unknown item', { itemId });
     }
   };
 
@@ -163,14 +164,14 @@ const styles = StyleSheet.create({
   itemsContainer: {
     paddingHorizontal: 16,
     paddingTop: 20,
-    gap: 8,
+    gap: 12,
   },
   settingsItem: {
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    marginBottom: 8,
+    // marginBottom removed - gap is handled by itemsContainer gap: 8
   },
   itemContent: {
     flexDirection: 'row',

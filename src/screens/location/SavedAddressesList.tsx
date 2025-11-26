@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { LocationStackNavigationProp } from '../../types/navigation';
 import Header from '../../components/layout/Header';
 import MapPinIcon from '../../assets/images/map-pin.svg';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface Address {
@@ -47,7 +48,7 @@ const SavedAddressesList: React.FC = () => {
         // Using dummy data for now
         setAddresses(DUMMY_ADDRESSES);
       } catch (error) {
-        console.error('Error fetching addresses:', error);
+        logger.error('Error fetching addresses', error);
         setAddresses(DUMMY_ADDRESSES);
       } finally {
         setLoading(false);
@@ -63,7 +64,7 @@ const SavedAddressesList: React.FC = () => {
 
   const handleAddressPress = (address: Address) => {
     // TODO: Handle address selection/editing
-    console.log('Address selected:', address);
+    logger.info('Address selected', { address });
   };
 
   return (

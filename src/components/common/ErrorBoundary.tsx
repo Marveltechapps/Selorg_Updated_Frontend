@@ -5,7 +5,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { logger } from '../../utils/logger';
+import { logger } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
@@ -89,24 +89,29 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#333',
+    color: '#1A1A1A',
+    fontFamily: 'Inter',
   },
   message: {
     fontSize: 16,
-    color: '#666',
+    color: '#6B6B6B',
     textAlign: 'center',
     marginBottom: 20,
+    fontFamily: 'Inter',
+    lineHeight: 22,
   },
   button: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    backgroundColor: '#034703',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
     borderRadius: 8,
+    minWidth: 120,
   },
   buttonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Inter',
   },
 });
 

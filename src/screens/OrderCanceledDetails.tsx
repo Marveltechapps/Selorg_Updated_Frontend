@@ -14,6 +14,7 @@ import type { OrdersStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import CancelIcon from '../assets/images/cancel-icon.svg';
 import ChatIcon from '../assets/images/chat-icon.svg';
+import { logger } from '@/utils/logger';
 
 // Product image from assets
 const PRODUCT_IMAGE = require('../assets/images/product-image-1.png');
@@ -86,7 +87,7 @@ const OrderCanceledDetails: React.FC = () => {
         // Using dummy data for now
         setOrderDetails(DUMMY_ORDER_DETAILS);
       } catch (error) {
-        console.error('Error fetching order details:', error);
+        logger.error('Error fetching order details', error);
         // Fallback to dummy data
         setOrderDetails(DUMMY_ORDER_DETAILS);
       } finally {
@@ -103,7 +104,7 @@ const OrderCanceledDetails: React.FC = () => {
 
   const handleOrderAgain = () => {
     // TODO: Navigate to order again flow
-    console.log('Order again pressed');
+    logger.info('Order again pressed');
   };
 
   if (loading) {

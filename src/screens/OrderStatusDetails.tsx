@@ -29,6 +29,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
+import { logger } from '@/utils/logger';
 import type {
   OrdersStackNavigationProp,
   OrdersStackRouteProp,
@@ -123,7 +124,7 @@ const OrderStatusDetails: React.FC = () => {
         const dummyData = getDummyOrderDetails(orderId || '1', status);
         setOrderDetails(dummyData);
       } catch (error) {
-        console.error('Error fetching order details:', error);
+        logger.error('Error fetching order details', error);
       } finally {
         setLoading(false);
       }
@@ -138,15 +139,15 @@ const OrderStatusDetails: React.FC = () => {
   };
 
   const handleSavingsPress = () => {
-    console.log('handleSavingsPress called');
+    logger.info('handleSavingsPress called');
     
     if (!orderDetails) {
-      console.log('orderDetails is null');
+      logger.info('orderDetails is null');
       return;
     }
     
     if (!navigation) {
-      console.log('navigation is null');
+      logger.info('navigation is null');
       Alert.alert('Error', 'Navigation not available');
       return;
     }
@@ -195,7 +196,7 @@ const OrderStatusDetails: React.FC = () => {
         navigation.navigate('OrderItemsDetails', navigationParams);
       }
     } catch (error) {
-      console.error('Navigation error:', error);
+      logger.error('Navigation error', error);
       // If navigation fails, try using dispatch
       try {
         navigation.dispatch(
@@ -205,7 +206,7 @@ const OrderStatusDetails: React.FC = () => {
           })
         );
       } catch (dispatchError) {
-        console.error('Navigation dispatch error:', dispatchError);
+        logger.error('Navigation dispatch error', dispatchError);
         Alert.alert('Error', 'Failed to navigate to order items details');
       }
     }
@@ -393,10 +394,19 @@ const OrderStatusDetails: React.FC = () => {
         {/* Route Map - Full width on top */}
         {orderDetails && (
           <View style={styles.mapContainer}>
-            <RouteMap
-              deliveryAddress={orderDetails.deliveryAddress}
-              height={200}
-            />
+            <ErrorBoundary
+              fallback={
+                <View style={styles.mapErrorContainer}>
+                  <Text style={styles.mapErrorText}>Unable to load map</Text>
+                  <Text style={styles.mapErrorSubtext}>Please check your location permissions</Text>
+                </View>
+              }
+            >
+              <RouteMap
+                deliveryAddress={orderDetails.deliveryAddress}
+                height={200}
+              />
+            </ErrorBoundary>
           </View>
         )}
 
@@ -689,6 +699,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '400',
     color: '#828282',
+  },
+  mapErrorContainer: {
+    width: '100%',
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    padding: 20,
+  },
+  mapErrorText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  mapErrorSubtext: {
+    fontSize: 14,
+    color: '#6B6B6B',
+    textAlign: 'center',
   },
 });
 

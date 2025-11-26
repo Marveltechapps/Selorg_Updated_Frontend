@@ -37,6 +37,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation, useFocusEffect, useRoute, useIsFocused } from '@react-navigation/native';
 import Header from '../components/layout/Header';
 import CartItem, { CartItemData } from '../components/features/cart/CartItem';
+import { logger } from '@/utils/logger';
 import BillSummary, { BillSummaryData } from '../components/features/cart/BillSummary';
 import DeliveryAddressCard from '../components/features/order/DeliveryAddressCard';
 import { useCart, CartItem as CartContextItem } from '../contexts/CartContext';
@@ -444,7 +445,7 @@ const Checkout: React.FC<CheckoutScreenProps> = ({
         friction: 10,
       }),
     ]).start(() => {
-      console.log('Proceed to payment');
+      logger.info('Proceed to payment');
       // navigation.navigate('Payment');
     });
   };

@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const ONBOARDING_DATA = {
@@ -76,7 +77,7 @@ const OnboardingScreen3: React.FC<OnboardingScreen3Props> = ({
         navigation.replace('Login');
       }
     } catch (error) {
-      console.error('Error completing onboarding:', error);
+      logger.error('Error completing onboarding', error);
     } finally {
       setLoading(false);
     }

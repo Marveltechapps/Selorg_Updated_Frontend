@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { RootStackNavigationProp } from '../../types/navigation';
 import Text from '../common/Text';
 import CategoryCard from '../CategoryCard';
@@ -18,33 +18,53 @@ interface CategorySectionProps {
 }
 
 const categories: Category[] = [
-  { id: '1', name: 'Fresh Vegetables', image: require('../assets/images/categories/fresh-vegetables.png') },
-  { id: '2', name: 'Fresh Fruits', image: require('../assets/images/categories/fresh-fruits.png') },
-  { id: '3', name: 'Dairy, Bread\nand Eggs', image: require('../assets/images/categories/dairy-bread-eggs.png') },
-  { id: '4', name: 'Atta, Rice and Dal', image: require('../assets/images/categories/atta-rice-dal.png') },
-  { id: '5', name: 'Oil and Ghee', image: require('../assets/images/categories/oil-ghee.png') },
-  { id: '6', name: 'Masalas and\nWhole Spices', image: require('../assets/images/categories/masalas-spices.png') },
-  { id: '7', name: 'Salt, Sugar\nand Jaggery', image: require('../assets/images/categories/salt-sugar-jaggery.png') },
-  { id: '8', name: 'Dry Fruits\nand Seeds', image: require('../assets/images/categories/dry-fruits-seeds.png') },
-  { id: '9', name: 'Sauces and spreads', image: require('../assets/images/categories/sauces-spreads.png') },
-  { id: '10', name: 'Tea and coffee', image: require('../assets/images/categories/tea-coffee.png') },
-  { id: '11', name: 'Vermicelli\nand Noodles', image: require('../assets/images/categories/vermicelli-noodles.png') },
+  { id: '1', name: 'Fresh Vegetables', image: require('../../assets/images/categories/fresh-vegetables.png') },
+  { id: '2', name: 'Fresh Fruits', image: require('../../assets/images/categories/fresh-fruits.png') },
+  { id: '3', name: 'Dairy, Bread\nand Eggs', image: require('../../assets/images/categories/dairy-bread-eggs.png') },
+  { id: '4', name: 'Atta, Rice and Dal', image: require('../../assets/images/categories/atta-rice-dal.png') },
+  { id: '5', name: 'Oil and Ghee', image: require('../../assets/images/categories/oil-ghee.png') },
+  { id: '6', name: 'Masalas and\nWhole Spices', image: require('../../assets/images/categories/masalas-spices.png') },
+  { id: '7', name: 'Salt, Sugar\nand Jaggery', image: require('../../assets/images/categories/salt-sugar-jaggery.png') },
+  { id: '8', name: 'Dry Fruits\nand Seeds', image: require('../../assets/images/categories/dry-fruits-seeds.png') },
+  { id: '9', name: 'Sauces and spreads', image: require('../../assets/images/categories/sauces-spreads.png') },
+  { id: '10', name: 'Tea and coffee', image: require('../../assets/images/categories/tea-coffee.png') },
+  { id: '11', name: 'Vermicelli\nand Noodles', image: require('../../assets/images/categories/vermicelli-noodles.png') },
 ];
 
 export default function CategorySection({ title = 'Grocery & Kitchen', onCategoryPress }: CategorySectionProps) {
   const navigation = useNavigation<RootStackNavigationProp>();
+  const { width: screenWidth } = useWindowDimensions();
+  
+  // Fixed card width (104px as per design)
+  const CARD_WIDTH = 104;
+  
+  // Calculate responsive gap to center 3 cards properly
+  // Screen width - container padding (16px * 2) - 3 card widths = remaining space
+  // Divide by 2 (number of gaps between 3 cards) to get gap size
+  const cardGap = useMemo(() => {
+    const containerPadding = 16 * 2; // 16px on each side
+    const totalCardWidth = CARD_WIDTH * 3; // 3 cards
+    const remainingSpace = screenWidth - containerPadding - totalCardWidth;
+    const gap = Math.max(16, Math.floor(remainingSpace / 2)); // Minimum 16px gap
+    return gap;
+  }, [screenWidth]);
   
   const handleCategoryPress = (categoryId: string) => {
-    if (onCategoryPress) {
-      onCategoryPress(categoryId);
-    } else {
-      // Find category name
-      const category = categories.find((cat) => cat.id === categoryId);
-      const categoryName = category?.name || 'Category';
-      navigation.navigate('CategoryProducts', {
-        categoryId,
-        categoryName: categoryName.replace(/\n/g, ' '), // Replace newlines with spaces
-      });
+    try {
+      if (onCategoryPress) {
+        onCategoryPress(categoryId);
+      } else {
+        // Find category name
+        const category = categories.find((cat) => cat.id === categoryId);
+        const categoryName = category?.name || 'Category';
+        navigation.navigate('CategoryProducts', {
+          categoryId,
+          categoryName: categoryName.replace(/\n/g, ' '), // Replace newlines with spaces
+        });
+      }
+    } catch (error) {
+      // Silently handle navigation errors
+      console.warn('Error navigating to category:', error);
     }
   };
 
@@ -72,18 +92,19 @@ export default function CategorySection({ title = 'Grocery & Kitchen', onCategor
 
       <View style={styles.categoriesContainer}>
         {rows.map((row, rowIndex) => (
-          <View key={rowIndex} style={styles.row}>
+          <View key={rowIndex} style={[styles.row, { gap: cardGap }]}>
             {row.map((category) => (
               <CategoryCard
                 key={category.id}
                 image={category.image}
                 name={category.name}
                 onPress={() => handleCategoryPress(category.id)}
+                width={CARD_WIDTH}
               />
             ))}
             {/* Fill remaining slots if row has less than 3 items */}
             {row.length < 3 && Array.from({ length: 3 - row.length }).map((_, index) => (
-              <View key={`spacer-${index}`} style={styles.spacer} />
+              <View key={`spacer-${index}`} style={[styles.spacer, { width: CARD_WIDTH }]} />
             ))}
           </View>
         ))}
@@ -135,10 +156,11 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignSelf: 'stretch',
-    gap: 16, // Matches Figma
+    justifyContent: 'center', // Center cards horizontally
+    // gap will be set dynamically via style prop
   },
   spacer: {
-    width: 104,
+    // Width will be set dynamically based on cardWidth
   },
 });
 

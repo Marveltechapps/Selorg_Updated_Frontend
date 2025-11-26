@@ -9,13 +9,14 @@ import type { ApiResponse, RequestConfig } from './types';
 
 import { getEnvConfigSafe } from '../../config/env';
 import { tokenManager } from './tokenManager';
+import { logger } from '@/utils/logger';
 
 // Base URL from environment config
 const getBaseURL = (): string => {
   try {
     return getEnvConfigSafe().apiBaseUrl;
   } catch (error) {
-    console.error('Error getting base URL, using default:', error);
+    logger.error('Error getting base URL, using default', error);
     return 'https://api.example.com';
   }
 };

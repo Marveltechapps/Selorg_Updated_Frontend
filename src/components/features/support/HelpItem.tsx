@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import ChevronDownIcon from '../../../assets/images/chevron-down.svg';
+import ChevronDownIcon from '@/assets/images/chevron-down.svg';
 
 interface HelpItemProps {
   title: string;

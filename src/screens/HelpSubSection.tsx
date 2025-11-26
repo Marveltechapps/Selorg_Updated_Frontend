@@ -11,6 +11,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { CustomerSupportStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import FAQItem from '../components/features/support/FAQItem';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const FAQ_DATA: Record<string, Array<{ question: string; answer: string }>> = {
@@ -130,7 +131,7 @@ const HelpSubSection: React.FC = () => {
         const data = FAQ_DATA[sectionName] || [];
         setFaqItems(data);
       } catch (error) {
-        console.error('Error fetching FAQ data:', error);
+        logger.error('Error fetching FAQ data', error);
         // Fallback to dummy data
         setFaqItems(FAQ_DATA[sectionName] || []);
       } finally {

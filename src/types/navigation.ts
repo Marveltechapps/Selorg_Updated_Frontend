@@ -11,9 +11,11 @@ export interface User {
   avatar?: string;
 }
 
-export interface NavigationProps {
-  navigation?: any;
-  route?: any;
+import type { RouteProp } from '@react-navigation/native';
+
+export interface NavigationProps<T extends keyof RootStackParamList = keyof RootStackParamList> {
+  navigation?: NativeStackNavigationProp<RootStackParamList, T>;
+  route?: RouteProp<RootStackParamList, T>;
 }
 
 // Main Tab Navigator - Bottom tab navigation
@@ -45,7 +47,9 @@ export type RootStackParamList = {
   Refunds: undefined;
   Profile: undefined;
   PaymentManagement: undefined;
-  GeneralInfo: undefined;
+  GeneralInfo: {
+    screen?: 'GeneralInfo' | 'TermsAndConditions' | 'PrivacyPolicy';
+  } | undefined;
   Notifications: undefined;
   Checkout: { appliedCoupon?: { code: string; discount: number } } | undefined;
   Coupons: undefined;
@@ -121,7 +125,7 @@ export type CustomerSupportStackParamList = {
 };
 
 // Navigation prop types
-import type { RouteProp } from '@react-navigation/native';
+// RouteProp is imported above with NavigationProps
 
 export type RootStackNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export type RootStackRouteProp<T extends keyof RootStackParamList> = RouteProp<RootStackParamList, T>;

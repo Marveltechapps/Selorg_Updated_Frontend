@@ -49,3 +49,5 @@ echo "📝 Next steps:"
 echo "1. Start Metro bundler: npm start -- --reset-cache"
 echo "2. In another terminal, run: npm run ios (or npm run android)"
 
+
+

@@ -18,6 +18,7 @@ import type { RootStackNavigationProp, RootStackRouteProp } from '../types/navig
 import BackIcon from '../components/icons/BackIcon';
 import SearchIcon from '../components/icons/SearchIcon';
 import Text from '../components/common/Text';
+import { logger } from '@/utils/logger';
 import RupeeIcon from '../components/icons/RupeeIcon';
 import PlusIcon from '../components/icons/PlusIcon';
 import MinusIcon from '../components/icons/MinusIcon';
@@ -102,7 +103,7 @@ export default function ProductDetailScreen({
   productId: propProductId,
   fetchProductDetail,
   fetchSimilarProducts,
-}: ProductDetailScreenProps = {}) {
+}: ProductDetailScreenProps = {} as ProductDetailScreenProps) {
   const navigation = useNavigation<RootStackNavigationProp>();
   const route = useRoute<RootStackRouteProp<'ProductDetail'>>();
   const routeParams = route.params || {};
@@ -135,7 +136,7 @@ export default function ProductDetailScreen({
           setProductDetail(data);
           setSelectedVariantId(data.variants[0]?.id || '');
         } catch (error) {
-          console.error('Error fetching product detail:', error);
+          logger.error('Error fetching product detail', error);
           // Fallback to dummy data on error
           setProductDetail(DUMMY_PRODUCT_DETAIL);
         } finally {
@@ -154,7 +155,7 @@ export default function ProductDetailScreen({
           const data = await fetchSimilarProducts(productId);
           setSimilarProducts(data);
         } catch (error) {
-          console.error('Error fetching similar products:', error);
+          logger.error('Error fetching similar products', error);
           // Fallback to dummy data on error
           setSimilarProducts(DUMMY_SIMILAR_PRODUCTS);
         }

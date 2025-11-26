@@ -8,7 +8,7 @@ interface OrganicTaglineSectionProps {
 }
 
 // Default icon from assets
-const DEFAULT_ICON = require('../assets/images/organic-tagline-icon.png');
+const DEFAULT_ICON = require('../../assets/images/organic-tagline-icon.png');
 
 export default function OrganicTaglineSection({
   icon,
@@ -71,7 +71,8 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingTop: 20,
+    paddingBottom: 0, // Remove bottom padding
     gap: 12,
     backgroundColor: '#F5f5f5',
   },

@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { GeneralInfoStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const DUMMY_PRIVACY_CONTENT = `Effective Date: [Insert Date]
@@ -132,7 +133,7 @@ const PrivacyPolicy: React.FC = () => {
         // Using dummy data for now
         setContent(DUMMY_PRIVACY_CONTENT);
       } catch (error) {
-        console.error('Error fetching privacy content:', error);
+        logger.error('Error fetching privacy content', error);
         // Fallback to dummy data
         setContent(DUMMY_PRIVACY_CONTENT);
       } finally {

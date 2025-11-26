@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import Text from './common/Text';
+import { logger } from '@/utils/logger';
 
 export interface LifestyleItem {
   id: string;
@@ -20,7 +21,7 @@ export default function LifestyleCard({ item, onPress }: LifestyleCardProps) {
     if (onPress) {
       onPress(item.id);
     } else {
-      console.log('Lifestyle item pressed:', item.id);
+      logger.info('Lifestyle item pressed', { itemId: item.id });
     }
   };
 

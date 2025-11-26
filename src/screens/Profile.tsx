@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import ProfileUpdateSuccess from './ProfileUpdateSuccess';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface ProfileData {
@@ -53,7 +54,7 @@ const Profile: React.FC = () => {
         setMobileNumber(DUMMY_PROFILE_DATA.mobileNumber);
         setEmailAddress(DUMMY_PROFILE_DATA.emailAddress);
       } catch (error) {
-        console.error('Error fetching profile data:', error);
+        logger.error('Error fetching profile data', error);
         // Fallback to dummy data
         setName(DUMMY_PROFILE_DATA.name);
         setMobileNumber(DUMMY_PROFILE_DATA.mobileNumber);
@@ -92,7 +93,7 @@ const Profile: React.FC = () => {
         onUpdateSuccess();
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      logger.error('Error updating profile', error);
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@ import { View, StyleSheet, Image, ImageSourcePropType, ScrollView, TouchableOpac
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import { getWindowDimensions } from '../utils/responsive';
+import { logger } from '@/utils/logger';
 
 // Placeholder image - will be replaced when actual image is downloaded from Figma
 const PLACEHOLDER_IMAGE = require('../assets/images/banner.png');
@@ -36,11 +37,14 @@ export default function Banner({
   const [loading, setLoading] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   
-  // Responsive banner width - account for container padding (16px on each side)
+  // Gap between banner cards
+  const cardGap = 12;
+  
+  // Responsive banner width - account for container padding and gap between cards
   const bannerWidth = useMemo(() => {
     const screenWidth = getWindowDimensions().width;
-    const containerPadding = 16 * 2; // 16px padding on each side
-    return screenWidth - containerPadding;
+    const containerPadding = 12 * 2; // 12px padding on each side
+    return screenWidth - containerPadding - cardGap; // Account for gap
   }, []);
 
   // Placeholder for API integration
@@ -52,7 +56,7 @@ export default function Banner({
           const data = await fetchBannerData();
           setBannerImages(data);
         } catch (error) {
-          console.error('Error fetching banner data:', error);
+          logger.error('Error fetching banner data', error);
           // Fallback to provided banners or dummy data
           setBannerImages(banners || (image ? [image] : DUMMY_BANNERS));
         } finally {
@@ -65,8 +69,8 @@ export default function Banner({
 
   const handleScroll = (event: any) => {
     const scrollPosition = event.nativeEvent.contentOffset.x;
-    const width = bannerWidth;
-    const index = Math.round(scrollPosition / width);
+    const cardWidthWithGap = bannerWidth + cardGap; // Account for gap between cards
+    const index = Math.round(scrollPosition / cardWidthWithGap);
     setCurrentIndex(index);
   };
 
@@ -90,17 +94,21 @@ export default function Banner({
       <ScrollView
         ref={scrollViewRef}
         horizontal
-        pagingEnabled
+        pagingEnabled={false}
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        style={[styles.scrollView, { width: bannerWidth }]}
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
+        contentContainerStyle={[styles.scrollContent, { paddingRight: 12 }]}
       >
         {bannerImages.map((banner, index) => (
           <TouchableOpacity
             key={index}
-            style={[styles.imageContainer, { width: bannerWidth }]}
+            style={[
+              styles.imageContainer, 
+              { width: bannerWidth },
+              index < bannerImages.length - 1 && { marginRight: cardGap } // Add gap between cards
+            ]}
             onPress={() => handlePress(index)}
             activeOpacity={0.9}
           >
@@ -133,7 +141,7 @@ export default function Banner({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 12, // Reduced padding for larger banner
     paddingVertical: 20,
     gap: 12,
   },
@@ -142,10 +150,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     alignItems: 'center',
+    paddingLeft: 12, // Add left padding for first card
   },
   imageContainer: {
-    height: 272,
-    borderRadius: 8,
+    height: 340, // Increased from 272 to 340 (25% larger)
+    borderRadius: 12, // Slightly larger border radius
     overflow: 'hidden',
   },
   bannerImage: {

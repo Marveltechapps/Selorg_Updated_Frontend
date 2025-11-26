@@ -14,6 +14,7 @@ import NetInfo from '@react-native-community/netinfo';
 import NoInternetIcon from '../assets/images/no-internet-icon.svg';
 import type { RootStackParamList } from '../types/navigation';
 import { useNetwork } from '../contexts/NetworkContext';
+import { logger } from '@/utils/logger';
 
 // Screen data
 const SCREEN_DATA = {
@@ -45,7 +46,7 @@ const NoInternet: React.FC<NoInternetScreenProps> = () => {
     try {
       // Check if NetInfo native module is available
       if (!NetInfo || typeof NetInfo.fetch !== 'function') {
-        console.error('NetInfo native module is not available');
+        logger.error('NetInfo native module is not available');
         alert('Network module not available. Please rebuild the app.');
         setIsChecking(false);
         return;
@@ -69,10 +70,10 @@ const NoInternet: React.FC<NoInternetScreenProps> = () => {
         }
       } else {
         // Still offline
-        console.log('Still offline');
+        logger.info('Still offline');
       }
     } catch (error) {
-      console.error('Error checking connectivity:', error);
+      logger.error('Error checking connectivity', error);
     } finally {
       setIsChecking(false);
     }

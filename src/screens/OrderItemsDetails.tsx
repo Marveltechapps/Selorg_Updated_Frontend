@@ -27,6 +27,7 @@ import type {
 } from '../types/navigation';
 import Header from '../components/layout/Header';
 import ChatIconOrder from '../assets/images/chat-icon-order.svg';
+import { logger } from '@/utils/logger';
 import StatusIconGettingPacked from '../assets/images/status-icon-getting-packed.svg';
 
 interface OrderItem {
@@ -102,7 +103,7 @@ const OrderItemsDetails: React.FC = () => {
 
   const handleDownloadInvoice = () => {
     // TODO: Implement invoice download functionality
-    console.log('Download invoice pressed');
+    logger.info('Download invoice pressed');
   };
 
   const renderStatusCard = () => {

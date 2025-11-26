@@ -12,6 +12,7 @@ import type { CustomerSupportStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import HelpItem from '../components/features/support/HelpItem';
 import SupportCard from '../components/features/support/SupportCard';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const HELP_ITEMS = [
@@ -43,7 +44,7 @@ const CustomerSupport: React.FC = () => {
         // Using dummy data for now
         setHelpItems(HELP_ITEMS);
       } catch (error) {
-        console.error('Error fetching help items:', error);
+        logger.error('Error fetching help items', error);
         // Fallback to dummy data
         setHelpItems(HELP_ITEMS);
       } finally {
@@ -68,7 +69,7 @@ const CustomerSupport: React.FC = () => {
 
   const handleChatPress = () => {
     // Handle chat button press
-    console.log('Chat pressed');
+    logger.info('Chat pressed');
     // TODO: Implement chat functionality
   };
 

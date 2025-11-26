@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { OrdersStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
+import { logger } from '@/utils/logger';
 import CheckmarkIcon from '../assets/images/checkmark-icon.svg';
 import CancelIcon from '../assets/images/cancel-icon.svg';
 import ChevronRightIcon from '../assets/images/chevron-right.svg';
@@ -82,7 +83,7 @@ const MyOrders: React.FC = () => {
         // Using dummy data for now
         setOrders(DUMMY_ORDERS);
       } catch (error) {
-        console.error('Error fetching orders:', error);
+        logger.error('Error fetching orders', error);
         // Fallback to dummy data
         setOrders(DUMMY_ORDERS);
       } finally {
@@ -93,7 +94,7 @@ const MyOrders: React.FC = () => {
     fetchOrders();
   }, []);
 
-  const handleOrderPress = (order: Order) => {
+  const handleOrderPress = useCallback((order: Order) => {
     try {
       if (order.status === 'cancelled') {
         navigation.navigate('OrderCanceledDetails', { orderId: order.id });
@@ -101,24 +102,31 @@ const MyOrders: React.FC = () => {
         navigation.navigate('OrderSuccessfulDetails', { orderId: order.id });
       }
     } catch (error) {
-      console.error('Navigation error:', error);
+      logger.error('Navigation error', error);
     }
-  };
+  }, [navigation]);
 
-  const handleRateOrder = (order: Order) => {
+  const handleRateOrder = useCallback((order: Order) => {
     navigation.navigate('RateOrder', { orderId: order.id });
-  };
+  }, [navigation]);
 
-  const handleOrderAgain = (order: Order) => {
+  const handleOrderAgain = useCallback((order: Order) => {
     // TODO: Navigate to order again flow or refresh orders
-    console.log('Order again:', order.id);
-  };
+    logger.info('Order again', { orderId: order.id });
+  }, []);
 
-  const filteredOrders = filter === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === filter);
+  const filteredOrders = useMemo(() => {
+    return filter === 'all' 
+      ? orders 
+      : orders.filter(order => order.status === filter);
+  }, [orders, filter]);
 
-  const renderOrderCard = ({ item }: { item: Order }) => (
+  const handleFilterAll = useCallback(() => setFilter('all'), []);
+  const handleFilterDelivered = useCallback(() => setFilter('delivered'), []);
+  const handleFilterCancelled = useCallback(() => setFilter('cancelled'), []);
+  const keyExtractor = useCallback((item: Order) => item.id, []);
+
+  const renderOrderCard = useCallback(({ item }: { item: Order }) => (
     <View style={styles.orderCardContainer}>
       <View style={styles.cardWrapper}>
         <TouchableOpacity
@@ -215,7 +223,7 @@ const MyOrders: React.FC = () => {
         </View>
       </View>
     </View>
-  );
+  ), [handleOrderPress, handleRateOrder, handleOrderAgain]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -225,7 +233,7 @@ const MyOrders: React.FC = () => {
       <View style={styles.filterContainer}>
         <TouchableOpacity
           style={[styles.filterButton, filter === 'all' && styles.filterButtonActive]}
-          onPress={() => setFilter('all')}
+          onPress={handleFilterAll}
           activeOpacity={0.7}
         >
           <Text style={[styles.filterText, filter === 'all' && styles.filterTextActive]}>
@@ -234,7 +242,7 @@ const MyOrders: React.FC = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.filterButton, filter === 'delivered' && styles.filterButtonActive]}
-          onPress={() => setFilter('delivered')}
+          onPress={handleFilterDelivered}
           activeOpacity={0.7}
         >
           <Text style={[styles.filterText, filter === 'delivered' && styles.filterTextActive]}>
@@ -243,7 +251,7 @@ const MyOrders: React.FC = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.filterButton, filter === 'cancelled' && styles.filterButtonActive]}
-          onPress={() => setFilter('cancelled')}
+          onPress={handleFilterCancelled}
           activeOpacity={0.7}
         >
           <Text style={[styles.filterText, filter === 'cancelled' && styles.filterTextActive]}>
@@ -255,7 +263,7 @@ const MyOrders: React.FC = () => {
       <FlatList
         data={filteredOrders}
         renderItem={renderOrderCard}
-        keyExtractor={(item) => item.id}
+        keyExtractor={keyExtractor}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={

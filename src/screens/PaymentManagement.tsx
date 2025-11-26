@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import PaymentCard from '../components/PaymentCard';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface PaymentMethod {
@@ -57,7 +58,7 @@ const PaymentManagement: React.FC = () => {
         // Using dummy data for now
         setPaymentMethods(DUMMY_PAYMENT_METHODS);
       } catch (error) {
-        console.error('Error fetching payment methods:', error);
+        logger.error('Error fetching payment methods', error);
         // Fallback to dummy data
         setPaymentMethods(DUMMY_PAYMENT_METHODS);
       } finally {

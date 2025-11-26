@@ -15,6 +15,7 @@ import Header from '../../components/layout/Header';
 import SearchIcon from '../../assets/images/search-icon.svg';
 import CurrentLocationIcon from '../../assets/images/current-location-icon.svg';
 import MapPinIcon from '../../assets/images/map-pin.svg';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const SAVED_ADDRESSES_HEADING = 'SAVED ADDRESSES';
@@ -39,7 +40,7 @@ const LocationSearch: React.FC = () => {
         // Using dummy data for now
         setSavedAddresses([]);
       } catch (error) {
-        console.error('Error fetching saved addresses:', error);
+        logger.error('Error fetching saved addresses', error);
         setSavedAddresses([]);
       } finally {
         setLoading(false);

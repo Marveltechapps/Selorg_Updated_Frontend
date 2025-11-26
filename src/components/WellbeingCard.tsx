@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import Text from './common/Text';
+import { logger } from '@/utils/logger';
 
 export interface WellbeingProduct {
   id: string;
@@ -19,7 +20,7 @@ export default function WellbeingCard({ product, onPress }: WellbeingCardProps) 
     if (onPress) {
       onPress(product.id);
     } else {
-      console.log('Wellbeing product pressed:', product.id);
+      logger.info('Wellbeing product pressed', { productId: product.id });
     }
   };
 

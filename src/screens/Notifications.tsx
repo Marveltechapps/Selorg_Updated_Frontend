@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import NotificationItem from '../components/features/notification/NotificationItem';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface NotificationSetting {
@@ -54,7 +55,7 @@ const Notifications: React.FC = () => {
         // Using dummy data for now
         setNotificationSettings(DUMMY_NOTIFICATION_SETTINGS);
       } catch (error) {
-        console.error('Error fetching notification settings:', error);
+        logger.error('Error fetching notification settings', error);
         // Fallback to dummy data
         setNotificationSettings(DUMMY_NOTIFICATION_SETTINGS);
       } finally {

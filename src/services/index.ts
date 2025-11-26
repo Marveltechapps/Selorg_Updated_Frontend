@@ -8,4 +8,5 @@ export * from './orders/orderService';
 export * from './cart/cartService';
 export * from './location/locationService';
 export * from './profile/profileService';
+export * from './onboarding/onboardingService';
 

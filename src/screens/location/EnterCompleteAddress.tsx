@@ -14,6 +14,7 @@ import type { LocationStackNavigationProp } from '../../types/navigation';
 import Header from '../../components/layout/Header';
 import AddressSavedSuccess from './AddressSavedSuccess';
 import MapPinIcon from '../../assets/images/map-pin-4-alt.svg';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface AddressFormData {
@@ -52,7 +53,7 @@ const EnterCompleteAddress: React.FC = () => {
         // const data = await response.json();
         // setFormData(data.formData);
       } catch (error) {
-        console.error('Error fetching form data:', error);
+        logger.error('Error fetching form data', error);
       } finally {
         setLoading(false);
       }

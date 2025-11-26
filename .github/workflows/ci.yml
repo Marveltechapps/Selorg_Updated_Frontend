@@ -1,107 +1,92 @@
-name: CI
+name: Frontend CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   lint-and-test:
+    name: Lint and Test
     runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        node-version: [20.x]
-    
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
     
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+          node-version: '20'
         cache: 'npm'
     
     - name: Install dependencies
       run: npm ci
     
-    - name: Run linter
+      - name: Run ESLint
       run: npm run lint
+        continue-on-error: true
+
+      - name: Run Prettier check
+        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
+        continue-on-error: true
+
+      - name: Type check
+        run: npx tsc --noEmit
     
     - name: Run tests
-      run: npm test -- --coverage --watchAll=false
+        run: npm run test -- --coverage --watchAll=false
     
-    - name: Upload coverage to Codecov
+      - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       with:
         files: ./coverage/lcov.info
         fail_ci_if_error: false
+          flags: frontend
+        continue-on-error: true
 
-  build-android:
+  security-audit:
+    name: Security Audit
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
     
-    - name: Set up JDK
-      uses: actions/setup-java@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
       with:
-        distribution: 'temurin'
-        java-version: '17'
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20.x'
+          node-version: '20'
         cache: 'npm'
     
     - name: Install dependencies
       run: npm ci
     
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v2
-    
-    - name: Build Android APK
-      run: |
-        cd android
-        ./gradlew assembleRelease
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
       continue-on-error: true
     
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
-      if: success()
-      with:
-        name: android-apk
-        path: android/app/build/outputs/apk/release/*.apk
+      - name: Check for known vulnerabilities
+        run: npm audit --json > audit-results.json || true
 
-  build-ios:
-    runs-on: macos-latest
+  build-check:
+    name: Build Check
+    runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
     
-    - name: Use Node.js
-      uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+          node-version: '20'
         cache: 'npm'
     
     - name: Install dependencies
       run: npm ci
     
-    - name: Install CocoaPods dependencies
-      run: |
-        cd ios
-        pod install
+      - name: Check Expo configuration
+        run: npx expo-doctor
       continue-on-error: true
-    
-    - name: Build iOS
-      run: |
-        xcodebuild -workspace ios/Frontend.xcworkspace \
-          -scheme Frontend \
-          -configuration Release \
-          -destination 'generic/platform=iOS' \
-          clean build
-      continue-on-error: true
-

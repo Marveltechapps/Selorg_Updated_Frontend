@@ -7,37 +7,57 @@ import {
   TouchableOpacity,
   StatusBar,
   Animated,
-  Dimensions,
   PanResponder,
   Easing,
   Platform,
+  ActivityIndicator,
+  useWindowDimensions,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { getOnboardingPages, completeOnboarding, type OnboardingPage } from '../services/onboarding/onboardingService';
+import { saveOnboardingCompleted } from '../utils/storage';
+import { logger } from '@/utils/logger';
+import { scale, verticalScale, getSpacing, useDimensions, scaleFont } from '../utils/responsive';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+// Static image mapping - Required because React Native doesn't support dynamic require()
+const ONBOARDING_IMAGES: { [key: number]: any } = {
+  1: require('../assets/images/onboarding-screen-1.png'),
+  2: require('../assets/images/onboarding-screen-2.png'),
+  3: require('../assets/images/onboarding-screen-3.png'),
+};
 
-// Dummy static data - Replace with API call later
-// All onboarding pages data in a single array
-const ONBOARDING_PAGES = [
+// Helper function to get onboarding image
+const getOnboardingImage = (pageNumber: number) => {
+  return ONBOARDING_IMAGES[pageNumber] || ONBOARDING_IMAGES[1]; // Default to page 1 if not found
+};
+
+// Fallback static data - Used if API fails or returns no data
+const FALLBACK_ONBOARDING_PAGES = [
   {
     id: 1,
+    pageNumber: 1,
     title: 'Clean, Healthy Food for Your Family',
     description: 'You want clean, healthy food for your family. We deliver it.',
+    imageUrl: require('../assets/images/onboarding-screen-1.png'),
     image: require('../assets/images/onboarding-screen-1.png'),
   },
   {
     id: 2,
+    pageNumber: 2,
     title: 'Toxin-Free Groceries',
     description: 'Most groceries contain hidden toxins. SELORG eliminates them.',
+    imageUrl: require('../assets/images/onboarding-screen-2.png'),
     image: require('../assets/images/onboarding-screen-2.png'),
   },
   {
     id: 3,
+    pageNumber: 3,
     title: "India's First Lab-Tested Organic App",
     description:
       "India's first lab-tested organic grocery app. We're your health guardian.",
+    imageUrl: require('../assets/images/onboarding-screen-3.png'),
     image: require('../assets/images/onboarding-screen-3.png'),
     ctaText: 'Begin your clean food journey',
   },
@@ -53,10 +73,15 @@ interface OnboardingProps {
  * Only image, title, and description change between pages
  * Balance/layout remains the same
  */
-const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
+function Onboarding({ onComplete }: OnboardingProps) {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
+  const { width: responsiveWidth } = useDimensions();
   const [currentPageIndex, setCurrentPageIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const [onboardingPages, setOnboardingPages] = useState<OnboardingPage[]>([]);
+  const [fetchingPages, setFetchingPages] = useState<boolean>(true);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -67,11 +92,12 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const titleTranslateY = useRef(new Animated.Value(20)).current; // Staggered text animation
   const descriptionOpacity = useRef(new Animated.Value(1)).current;
   const descriptionTranslateY = useRef(new Animated.Value(20)).current; // Staggered text animation
+  // Pagination dots - initialized with max 3 pages
   const paginationDotScales = useRef(
-    ONBOARDING_PAGES.map(() => new Animated.Value(1))
+    [1, 2, 3].map(() => new Animated.Value(1))
   ).current;
   const paginationDotOpacities = useRef(
-    ONBOARDING_PAGES.map(() => new Animated.Value(0.5))
+    [1, 2, 3].map(() => new Animated.Value(0.5))
   ).current;
   
   // Progress animation for active dot (8 seconds)
@@ -120,9 +146,59 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
   const currentPageIndexRef = useRef(currentPageIndex);
 
-  const currentPage = ONBOARDING_PAGES[currentPageIndex];
-  const isLastPage = currentPageIndex === ONBOARDING_PAGES.length - 1;
+  // Use fetched pages or fallback to static data
+  // Always ensure we have pages available - use fallback if API fails or returns empty
+  const pages = onboardingPages.length > 0 
+    ? onboardingPages.map((page) => ({
+        ...page,
+        image: page.imageUrl?.startsWith('http') 
+          ? { uri: page.imageUrl } 
+          : getOnboardingImage(page.pageNumber || 1),
+      }))
+    : FALLBACK_ONBOARDING_PAGES;
+  
+  // Ensure pages is always an array with at least one item
+  const safePages = (pages && pages.length > 0) ? pages : FALLBACK_ONBOARDING_PAGES;
+
+  const currentPage = safePages[currentPageIndex];
+  const isLastPage = currentPageIndex === safePages.length - 1;
   const isFirstPage = currentPageIndex === 0;
+
+  // Fetch onboarding pages on mount
+  useEffect(() => {
+    const fetchPages = async () => {
+      try {
+        setFetchingPages(true);
+        const response = await getOnboardingPages();
+        
+        if (response?.data && Array.isArray(response.data) && response.data.length > 0) {
+          // Sort by pageNumber to ensure correct order
+          const sortedPages = response.data.sort((a, b) => 
+            (a.pageNumber || a.order || 0) - (b.pageNumber || b.order || 0)
+          );
+          setOnboardingPages(sortedPages);
+        } else {
+          // Use fallback data if API returns empty or invalid response
+          logger.warn('No onboarding pages from API, using fallback data');
+          setOnboardingPages([]);
+        }
+      } catch (error) {
+        // Network errors are expected in development - use fallback data
+        // Only log as warning since we handle it gracefully
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'NETWORK_ERROR') {
+          logger.info('Network unavailable, using fallback onboarding data');
+        } else {
+          logger.warn('Error fetching onboarding pages, using fallback data', error);
+        }
+        // Use fallback data on error
+        setOnboardingPages([]);
+      } finally {
+        setFetchingPages(false);
+      }
+    };
+
+    fetchPages();
+  }, []);
 
   // Update ref when page index changes
   useEffect(() => {
@@ -248,20 +324,23 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     ]);
 
     // 3. Pagination dot animation
-    const paginationAnimations = ONBOARDING_PAGES.map((_, index) => {
+    const paginationAnimations = safePages.map((_, index) => {
       const isActive = index === currentPageIndex;
-      return Animated.parallel([
-        Animated.spring(paginationDotScales[index], {
-          toValue: isActive ? 1.2 : 1,
-          useNativeDriver: true,
-        }),
-        Animated.timing(paginationDotOpacities[index], {
-          toValue: isActive ? 1 : 0.5,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]);
-    });
+      if (paginationDotScales[index] && paginationDotOpacities[index]) {
+        return Animated.parallel([
+          Animated.spring(paginationDotScales[index], {
+            toValue: isActive ? 1.2 : 1,
+            useNativeDriver: true,
+          }),
+          Animated.timing(paginationDotOpacities[index], {
+            toValue: isActive ? 1 : 0.5,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]);
+      }
+      return null;
+    }).filter((anim): anim is Animated.CompositeAnimation => anim !== null);
 
     // Start all animations
     Animated.parallel([
@@ -294,7 +373,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
       autoAdvanceTimer.current = setTimeout(() => {
         const nextIndex = currentPageIndexRef.current + 1;
-        if (nextIndex < ONBOARDING_PAGES.length) {
+        if (nextIndex < safePages.length) {
           // Animate out current content and go to next
           Animated.parallel([
             Animated.timing(fadeAnim, {
@@ -371,11 +450,11 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           }),
         ]).start(() => {
           // Change page after animation completes
-          setCurrentPageIndex(ONBOARDING_PAGES.length - 1);
+          setCurrentPageIndex(safePages.length - 1);
         });
       }
     } catch (error) {
-      console.error('Error handling skip:', error);
+      logger.error('Error handling skip', error);
     }
   };
 
@@ -396,14 +475,21 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     try {
       if (isLastPage) {
         // Last page - Complete onboarding and navigate to Login
-        // TODO: Mark onboarding as completed
-        // await AsyncStorage.setItem('onboarding_completed', 'true');
-        // await AsyncStorage.setItem('onboarding_completed_at', new Date().toISOString());
+        try {
+          // Mark onboarding as completed in backend (if user is authenticated)
+          await completeOnboarding();
+        } catch (error) {
+          // If user is not authenticated, just mark locally
+          logger.info('User not authenticated, marking onboarding completed locally');
+        }
+
+        // Mark onboarding as completed locally
+        await saveOnboardingCompleted();
 
         // TODO: Track onboarding completion
         // await analytics.track('onboarding_completed', {
         //   completed_at: new Date().toISOString(),
-        //   total_screens: ONBOARDING_PAGES.length,
+        //   total_screens: safePages.length,
         // });
 
         if (onComplete) {
@@ -438,18 +524,69 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         });
       }
     } catch (error) {
-      console.error('Error handling next:', error);
+      logger.error('Error handling next', error);
     } finally {
       setLoading(false);
     }
   };
 
+  // Show loading indicator while fetching pages
+  if (fetchingPages) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F5F5F5" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#034703" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Don't render if no pages available - should never happen due to safePages, but safety check
+  if (!currentPage || safePages.length === 0) {
+    // This should never happen, but if it does, navigate to login
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        navigation.replace('Login');
+      }, 2000);
+      return () => clearTimeout(timer);
+    }, [navigation]);
+    
+    return (
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <StatusBar barStyle="dark-content" backgroundColor="#F5F5F5" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#034703" />
+          <Text style={styles.errorText}>Loading onboarding...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Responsive dimensions - Image size optimized for screen
+  // Calculate responsive values based on screen size
+  const responsiveStyles = {
+    imageHeight: verticalScale(425 * 0.95), // Reduced by 5% for better balance (425 * 0.95 = 403.75)
+    headingFontSize: scaleFont(24),
+    paragraphFontSize: scaleFont(14),
+    buttonPaddingVertical: verticalScale(13),
+    buttonPaddingHorizontal: scale(16),
+    skipButtonPaddingTop: verticalScale(16),
+    headerPaddingTop: verticalScale(20),
+    headerPaddingBottom: verticalScale(16),
+    buttonMarginBottom: Math.max(insets.bottom, verticalScale(24)),
+    textContainerGap: verticalScale(16),
+    headerContainerGap: verticalScale(20),
+    paginationPaddingVertical: verticalScale(12),
+    paginationMarginTop: verticalScale(4),
+  };
+
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5F5F5" />
 
       {/* Skip Button - Hide on last page but maintain layout space */}
-      <View style={styles.skipButtonContainer}>
+      <View style={[styles.skipButtonContainer, { paddingTop: responsiveStyles.skipButtonPaddingTop }]}>
         {!isLastPage && (
           <TouchableOpacity
             style={styles.skipButton}
@@ -471,6 +608,9 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               { translateY: slideAnim },
               { translateX: swipeAnim },
             ],
+            paddingTop: responsiveStyles.headerPaddingTop,
+            paddingBottom: responsiveStyles.headerPaddingBottom,
+            gap: responsiveStyles.headerContainerGap,
           },
         ]}
         {...panResponder.panHandlers}
@@ -482,11 +622,14 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             {
               opacity: imageOpacity,
               transform: [{ scale: imageScale }],
+              height: responsiveStyles.imageHeight,
             },
           ]}
         >
           <Image
-            source={currentPage.image}
+            source={typeof currentPage.image === 'object' && 'uri' in currentPage.image 
+              ? currentPage.image 
+              : currentPage.image || getOnboardingImage(currentPageIndex + 1)}
             style={styles.image}
             resizeMode="cover"
             // Prevent background bleeding in release builds
@@ -495,7 +638,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         </Animated.View>
 
         {/* Text Container - Staggered Animation */}
-        <View style={styles.textContainer}>
+        <View style={[styles.textContainer, { gap: responsiveStyles.textContainerGap }]}>
           {/* Title - Animates first */}
           <Animated.View
             style={[
@@ -506,7 +649,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               },
             ]}
           >
-            <Text style={styles.heading}>{currentPage.title}</Text>
+            <Text style={[styles.heading, { fontSize: responsiveStyles.headingFontSize }]}>{currentPage.title}</Text>
           </Animated.View>
           
           {/* Description - Animates after title */}
@@ -519,7 +662,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               },
             ]}
           >
-            <Text style={styles.paragraph}>{currentPage.description}</Text>
+            <Text style={[styles.paragraph, { fontSize: responsiveStyles.paragraphFontSize }]}>{currentPage.description}</Text>
           </Animated.View>
         </View>
       </Animated.View>
@@ -530,29 +673,33 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           styles.paginationContainer,
           {
             opacity: fadeAnim,
+            paddingVertical: responsiveStyles.paginationPaddingVertical,
+            marginTop: responsiveStyles.paginationMarginTop,
           },
         ]}
       >
-        {ONBOARDING_PAGES.map((_, index) => {
+        {safePages.map((_, index) => {
           const isActive = index === currentPageIndex;
           
-          // Interpolate width for active dot: 7px to 28px over 8 seconds
+          // Interpolate width for active dot: 7px to 28px over 8 seconds (responsive)
+          const dotInactiveWidth = scale(7);
+          const dotActiveWidth = scale(28);
           const animatedWidth = isActive
             ? progressAnim.interpolate({
                 inputRange: [0, 1],
-                outputRange: [7, 28], // From inactive width to active width
+                outputRange: [dotInactiveWidth, dotActiveWidth], // From inactive width to active width
               })
-            : 7; // Inactive dots stay at 7px
+            : dotInactiveWidth; // Inactive dots stay at scaled 7px
 
           return (
             <View key={index} style={styles.paginationDotWrapper}>
               <Animated.View
                 style={[
                   {
-                    width: isActive ? animatedWidth : 7, // Animate width only for active dot (JS-driven)
-                    height: 7,
+                    width: isActive ? animatedWidth : dotInactiveWidth, // Animate width only for active dot (JS-driven)
+                    height: scale(7),
                     overflow: 'hidden',
-                    borderRadius: 3.5, // Rounded edges for the loading bar
+                    borderRadius: scale(3.5), // Rounded edges for the loading bar
                   },
                 ]}
               >
@@ -561,8 +708,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     styles.paginationDot,
                     index === currentPageIndex && styles.paginationDotActive,
                     {
-                      transform: [{ scale: paginationDotScales[index] }],
-                      opacity: paginationDotOpacities[index],
+                      transform: [{ scale: paginationDotScales[index] || new Animated.Value(1) }],
+                      opacity: paginationDotOpacities[index] || new Animated.Value(0.5),
                     },
                   ]}
                 />
@@ -573,16 +720,23 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </Animated.View>
 
       {/* Next/Complete Button */}
-      <View style={styles.buttonContainer}>
+      <View style={[styles.buttonContainer, { marginBottom: responsiveStyles.buttonMarginBottom }]}>
         <TouchableOpacity
-          style={[styles.nextButton, loading && styles.nextButtonDisabled]}
+          style={[
+            styles.nextButton, 
+            loading && styles.nextButtonDisabled,
+            {
+              paddingVertical: responsiveStyles.buttonPaddingVertical,
+              paddingHorizontal: responsiveStyles.buttonPaddingHorizontal,
+            }
+          ]}
           onPress={handleNext}
           disabled={loading}
           activeOpacity={0.8}
         >
           <Text style={styles.nextButtonText}>
             {isLastPage
-              ? currentPage.ctaText || 'Get Started'
+              ? (currentPage.ctaText || 'Get Started')
               : 'Next'}
           </Text>
           {!isLastPage && (
@@ -594,7 +748,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </View>
     </SafeAreaView>
   );
-};
+}
 
 // Reusable Sub-components (for easy componentization)
 const PaginationDot: React.FC<{ active: boolean }> = ({ active }) => (
@@ -636,28 +790,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
     alignItems: 'center',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorText: {
+    fontFamily: 'Inter',
+    fontSize: scale(16),
+    color: '#6B6B6B',
+    textAlign: 'center',
+  },
   skipButtonContainer: {
     width: '100%',
     alignItems: 'flex-end',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: getSpacing(16),
   },
   skipButton: {
-    paddingVertical: 7,
-    paddingHorizontal: 14,
+    paddingVertical: verticalScale(7),
+    paddingHorizontal: scale(14),
     borderWidth: 1,
     borderColor: '#696969',
-    borderRadius: 8.5,
-    minWidth: 57.06,
-    height: 40,
+    borderRadius: scale(8.5),
+    minWidth: scale(57.06),
+    height: verticalScale(40),
     justifyContent: 'center',
     alignItems: 'center',
   },
   skipButtonText: {
     fontFamily: 'Inter',
     fontWeight: '500',
-    fontSize: 14,
-    lineHeight: 22.4,
+    fontSize: scale(14),
+    lineHeight: verticalScale(22.4),
     color: '#6B6B6B',
     textAlign: 'center',
   },
@@ -665,19 +829,16 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     alignItems: 'center',
-    paddingTop: 24,
-    paddingBottom: 24,
-    gap: 24,
+    justifyContent: 'flex-start',
   },
   imageContainer: {
     width: '100%',
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingHorizontal: getSpacing(16),
+    borderRadius: scale(8),
     overflow: 'hidden',
-    height: 425,
     alignSelf: 'stretch',
-    // Explicit background to prevent grey overlay in release builds
-    backgroundColor: 'transparent',
+    // Set solid background color to fix shadow calculation warning
+    backgroundColor: '#FFFFFF',
     // Platform-specific shadow handling
     ...Platform.select({
       ios: {
@@ -701,7 +862,7 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    borderRadius: 8,
+    borderRadius: scale(8),
     // Ensure image fills container without background bleeding
     backgroundColor: 'transparent',
     // Prevent any default background
@@ -714,8 +875,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     width: '100%',
-    paddingHorizontal: 16,
-    gap: 20,
+    paddingHorizontal: getSpacing(16),
   },
   headingContainer: {
     width: '100%',
@@ -723,8 +883,7 @@ const styles = StyleSheet.create({
   heading: {
     fontFamily: 'Inter',
     fontWeight: '700',
-    fontSize: 24,
-    lineHeight: 32,
+    lineHeight: verticalScale(32),
     color: '#1A1A1A',
     textAlign: 'center',
   },
@@ -734,8 +893,7 @@ const styles = StyleSheet.create({
   paragraph: {
     fontFamily: 'Inter',
     fontWeight: '400',
-    fontSize: 14,
-    lineHeight: 21,
+    lineHeight: verticalScale(21),
     color: '#6B6B6B',
     textAlign: 'center',
   },
@@ -743,18 +901,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 7,
-    paddingVertical: 20,
+    gap: scale(7),
   },
   paginationDotWrapper: {
-    height: 7,
+    height: scale(7),
     justifyContent: 'center',
     alignItems: 'flex-start',
   },
   paginationDot: {
-    width: 28, // Full width - container will clip it
-    height: 7,
-    borderRadius: 3.5,
+    width: scale(28), // Full width - container will clip it
+    height: scale(7),
+    borderRadius: scale(3.5),
     backgroundColor: '#E8E8E8',
   },
   paginationDotActive: {
@@ -762,8 +919,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
-    paddingHorizontal: 16,
-    marginBottom: 32,
+    paddingHorizontal: getSpacing(16),
   },
   nextButton: {
     flexDirection: 'row',
@@ -771,11 +927,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     backgroundColor: '#034703',
-    borderRadius: 8,
-    paddingVertical: 13,
-    paddingHorizontal: 16,
-    gap: 6,
-    minHeight: 48,
+    borderRadius: scale(8),
+    gap: scale(6),
+    minHeight: verticalScale(48),
   },
   nextButtonDisabled: {
     opacity: 0.6,
@@ -783,23 +937,23 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontFamily: 'Inter',
     fontWeight: '500',
-    fontSize: 14,
-    lineHeight: 22.4,
+    fontSize: scale(14),
+    lineHeight: verticalScale(22.4),
     color: '#FFFFFF',
     textAlign: 'center',
   },
   nextButtonIcon: {
-    width: 14,
-    height: 14,
+    width: scale(14),
+    height: scale(14),
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 1, // Slight adjustment for better visual centering
+    paddingTop: verticalScale(1), // Slight adjustment for better visual centering
   },
   nextButtonIconText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scale(16),
     fontWeight: 'bold',
-    lineHeight: 14,
+    lineHeight: scale(14),
     textAlign: 'center',
   },
 });

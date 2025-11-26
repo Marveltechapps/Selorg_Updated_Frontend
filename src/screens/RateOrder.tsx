@@ -13,6 +13,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { OrdersStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import RatingSuccess from './RatingSuccess';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface OrderRating {
@@ -42,7 +43,7 @@ const RateOrder: React.FC = () => {
 
         // Using dummy data for now
       } catch (error) {
-        console.error('Error fetching order data:', error);
+        logger.error('Error fetching order data', error);
       } finally {
         setLoading(false);
       }

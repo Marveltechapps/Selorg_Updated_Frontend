@@ -14,7 +14,7 @@
  * @format
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -32,12 +32,14 @@ import * as Location from 'expo-location';
 import type { OrdersStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import RouteMap from '../components/features/location/RouteMap';
+import ErrorBoundary from '../components/common/ErrorBoundary';
 import PhoneIcon from '../assets/images/phone-icon.svg';
 import HomeIcon from '../assets/images/home-icon.svg';
 import StoreIcon from '../assets/images/store-icon.svg';
 import ChevronRightIcon from '../assets/images/chevron-right.svg';
 import ChatIconOrder from '../assets/images/chat-icon-order.svg';
 import OrderStatusIcon from '../assets/images/order-status-icon.svg';
+import { logger } from '@/utils/logger';
 
 interface LocationCoordinates {
   latitude: number;
@@ -107,7 +109,7 @@ const OrderStatusMain: React.FC = () => {
         // Using dummy data for now
         setOrder(DUMMY_ORDER);
       } catch (error) {
-        console.error('Error fetching order status:', error);
+        logger.error('Error fetching order status', error);
         // Fallback to dummy data
         setOrder(DUMMY_ORDER);
       } finally {
@@ -132,10 +134,12 @@ const OrderStatusMain: React.FC = () => {
         setHasLocationPermission(true);
         setLocationPermissionStatus('granted');
         // Fetch location - errors will be handled by fetchCurrentLocation
-        await fetchCurrentLocation().catch((error) => {
-          console.error('Error fetching location after permission grant:', error);
+        try {
+          await fetchCurrentLocation();
+        } catch (error) {
+          logger.error('Error fetching location after permission grant', error);
           // Error will be handled by fetchCurrentLocation's error handler
-        });
+        }
       } else {
         setHasLocationPermission(false);
         setLocationPermissionStatus('denied');
@@ -143,8 +147,8 @@ const OrderStatusMain: React.FC = () => {
         setLocationLoading(false);
       }
     } catch (error: any) {
-      console.error('Error in requestLocationPermission:', error);
-      console.error('Error details:', JSON.stringify(error, null, 2));
+      logger.error('Error in requestLocationPermission', error);
+      logger.error('Error details', { error: JSON.stringify(error, null, 2) });
       
       // Check if this is a Geolocation error (has code property)
       // If it is, fetchCurrentLocation will handle it, so don't set error here
@@ -180,7 +184,7 @@ const OrderStatusMain: React.FC = () => {
       setLocationPermissionStatus('granted');
       setLocationLoading(false);
     } catch (error: any) {
-      console.error('Error getting location:', error);
+      logger.error('Error getting location', error);
       
       let errorMessage = 'Failed to get current location';
       
@@ -202,7 +206,7 @@ const OrderStatusMain: React.FC = () => {
     }
   };
 
-  const handleOrderPress = (order: OrderStatus) => {
+  const handleOrderPress = useCallback((order: OrderStatus) => {
     // Prepare order items data - using dummy data structure similar to OrderStatusDetails
     const orderItems = [
       {
@@ -251,7 +255,7 @@ const OrderStatusMain: React.FC = () => {
       deliveryFee,
       totalBill,
     });
-  };
+  }, [navigation]);
 
 
   const formatDeliveryTime = (minutes: number): string => {
@@ -332,12 +336,21 @@ const OrderStatusMain: React.FC = () => {
     // Pass the current location to RouteMap so it doesn't request permission again
     return (
       <View style={styles.mapContainer}>
-        <RouteMap
-          deliveryAddress={order.deliveryAddress}
-          deliveryCoordinates={STATIC_DESTINATION}
-          currentLocation={currentLocation}
-          height={200}
-        />
+        <ErrorBoundary
+          fallback={
+            <View style={styles.mapErrorContainer}>
+              <Text style={styles.mapErrorText}>Unable to load map</Text>
+              <Text style={styles.mapErrorSubtext}>Please check your location permissions</Text>
+            </View>
+          }
+        >
+          <RouteMap
+            deliveryAddress={order.deliveryAddress}
+            deliveryCoordinates={STATIC_DESTINATION}
+            currentLocation={currentLocation}
+            height={200}
+          />
+        </ErrorBoundary>
       </View>
     );
   };
@@ -773,6 +786,26 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#828282',
     fontSize: 16,
+  },
+  mapErrorContainer: {
+    width: '100%',
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    padding: 20,
+  },
+  mapErrorText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  mapErrorSubtext: {
+    fontSize: 14,
+    color: '#6B6B6B',
+    textAlign: 'center',
   },
 });
 

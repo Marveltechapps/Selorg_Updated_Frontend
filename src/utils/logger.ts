@@ -7,13 +7,6 @@ import { getEnvConfigSafe } from '../config/env';
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-interface LogEntry {
-  level: LogLevel;
-  message: string;
-  data?: any;
-  timestamp: string;
-}
-
 class Logger {
   private shouldLog(): boolean {
     try {

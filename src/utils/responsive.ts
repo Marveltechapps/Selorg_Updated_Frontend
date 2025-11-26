@@ -90,9 +90,19 @@ export const hp = (percentage: number): number => {
 
 /**
  * Scale font size
+ * @param size - Base font size
+ * @param min - Minimum font size (optional)
+ * @param max - Maximum font size (optional)
  */
-export const scaleFont = (size: number): number => {
-  return scale(size);
+export const scaleFont = (size: number, min?: number, max?: number): number => {
+  const scaledSize = scale(size);
+  if (min !== undefined && scaledSize < min) {
+    return min;
+  }
+  if (max !== undefined && scaledSize > max) {
+    return max;
+  }
+  return scaledSize;
 };
 
 /**

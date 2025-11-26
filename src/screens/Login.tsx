@@ -12,12 +12,13 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import SelorgLogo from '../assets/images/selorg-logo.svg';
 import CountryFlagIcon from '../assets/images/country-flag-icon.svg';
 import { useDimensions, scale, scaleFont, getSpacing, getBorderRadius, wp } from '../utils/responsive';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const DEFAULT_COUNTRY_CODE = '+91';
@@ -35,6 +36,7 @@ interface LoginScreenProps {
 const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const { width } = useDimensions();
+  const insets = useSafeAreaInsets();
   const [phoneNumber, setPhoneNumber] = useState<string>(DEFAULT_PHONE_NUMBER);
   const [countryCode, setCountryCode] = useState<string>(DEFAULT_COUNTRY_CODE);
   const [loading, setLoading] = useState<boolean>(false);
@@ -89,10 +91,11 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       lineHeight: scaleFont(17.5, 16, 20),
     },
     inputWrapper: {
-      paddingVertical: getSpacing(12),
-      paddingHorizontal: getSpacing(12),
-      height: scale(48),
-      borderRadius: scale(8.5),
+      paddingVertical: 0, // Remove extra vertical padding for perfect centering
+      paddingHorizontal: getSpacing(14),
+      height: scale(54), // Fixed height so text is always centered
+      minHeight: scale(54),
+      borderRadius: scale(12),
     },
     countryCodeContainer: {
       width: scale(42.41),
@@ -102,8 +105,8 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       lineHeight: scaleFont(17.5, 16, 20),
     },
     phoneInput: {
-      fontSize: scaleFont(14, 12, 16),
-      lineHeight: scaleFont(20, 18, 22),
+      fontSize: scaleFont(14, 13, 15), // Reduced size for placeholder and entered number
+      lineHeight: scaleFont(18, 17, 19), // Adjusted lineHeight for smaller font
     },
     noteText: {
       fontSize: scaleFont(12, 11, 14),
@@ -116,9 +119,9 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     },
     actionSection: {
       paddingTop: getSpacing(24),
-      paddingBottom: getSpacing(24),
       paddingHorizontal: getSpacing(16),
       gap: getSpacing(14),
+      // paddingBottom will be set dynamically with safe area insets
     },
     sendOTPButton: {
       paddingVertical: getSpacing(13),
@@ -286,7 +289,7 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       // }
 
       // Dummy implementation for now
-      console.log('Sending OTP to:', `${countryCode}${phoneNumber}`);
+      logger.info('Sending OTP', { phoneNumber: `${countryCode}${phoneNumber}` });
       
       // Simulate API call delay
       await new Promise<void>(resolve => setTimeout(resolve, 1000));
@@ -301,7 +304,7 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
         onLoginSuccess(`${countryCode}${phoneNumber}`);
       }
     } catch (error) {
-      console.error('Error sending OTP:', error);
+      logger.error('Error sending OTP', error);
       setError('Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
@@ -309,15 +312,19 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   };
 
   const handleTermsPress = () => {
-    // TODO: Navigate to Terms of Service screen
-    // navigation.navigate('TermsAndConditions');
-    console.log('Terms of Service pressed');
+    // Navigate to Terms of Service screen via GeneralInfo stack
+    navigation.navigate('GeneralInfo', {
+      screen: 'TermsAndConditions',
+    });
+    logger.info('Terms of Service pressed');
   };
 
   const handlePrivacyPress = () => {
-    // TODO: Navigate to Privacy Policy screen
-    // navigation.navigate('PrivacyPolicy');
-    console.log('Privacy Policy pressed');
+    // Navigate to Privacy Policy screen via GeneralInfo stack
+    navigation.navigate('GeneralInfo', {
+      screen: 'PrivacyPolicy',
+    });
+    logger.info('Privacy Policy pressed');
   };
 
   const isValidPhoneNumber = (phone: string): boolean => {
@@ -330,7 +337,7 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       <StatusBar barStyle="light-content" backgroundColor="#034703" />
       
       {/* Header Section - Green Background - Starts from safe area */}
-      <SafeAreaView style={styles.headerSafeArea} edges={['top']}>
+      <SafeAreaView style={styles.headerSafeArea} edges={['top', 'bottom']}>
         <View style={[styles.headerSection, responsiveStyles.headerSection]}>
           <View style={[styles.headerContent, responsiveStyles.headerContent]}>
             {/* Logo Container with circular white background at 20% opacity - Animated */}
@@ -380,14 +387,18 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
       {/* Content Section - White Background */}
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        enabled={Platform.OS === 'ios'}
       >
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: getSpacing(20) }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          bounces={false}
         >
           <View style={[styles.contentSection, responsiveStyles.contentSection]}>
             {/* Section Header */}
@@ -414,6 +425,7 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                         inputRange: [0, 1],
                         outputRange: ['#D1D1D1', '#034703'], // From default to focus color
                       }),
+                      borderWidth: isInputFocused ? 2 : 1.5,
                     },
                   ]}
                 >
@@ -444,8 +456,13 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                         maxLength={10}
                         autoComplete="tel"
                         textContentType="telephoneNumber"
+                        textAlignVertical="center"
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
                         onFocus={() => setIsInputFocused(true)}
                         onBlur={() => setIsInputFocused(false)}
+                        returnKeyType="done"
+                        blurOnSubmit={true}
                       />
                     </View>
                   </Animated.View>
@@ -474,8 +491,8 @@ const Login: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           </View>
         </ScrollView>
 
-        {/* Action Section - Fixed at bottom */}
-        <View style={[styles.actionSection, responsiveStyles.actionSection]}>
+        {/* Action Section - Fixed at bottom with safe area */}
+        <View style={[styles.actionSection, responsiveStyles.actionSection, { paddingBottom: Math.max(insets.bottom, getSpacing(24)) }]}>
           <TouchableOpacity
             style={[
               styles.sendOTPButton,
@@ -563,6 +580,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'flex-start',
   },
   contentSection: {
     width: '100%',
@@ -589,37 +607,43 @@ const styles = StyleSheet.create({
   },
   inputSection: {
     width: '100%',
-    gap: 12,
+    gap: getSpacing(12),
   },
   inputContainer: {
     width: '100%',
-    gap: 4,
+    gap: getSpacing(4),
   },
   inputLabel: {
     fontFamily: 'Inter',
     fontWeight: '500',
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: scaleFont(12, 11, 14),
+    lineHeight: scaleFont(18, 16, 20),
     color: '#1A1A1A',
     textAlign: 'left',
   },
   inputWrapper: {
     width: '100%',
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#D1D1D1',
     overflow: 'hidden', // Ensure inner content doesn't overflow during scale
+    height: scale(54), // Fixed height for perfect centering
+    minHeight: scale(54),
     // Padding, height, and borderRadius moved to responsiveStyles
   },
   inputInnerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     width: '100%',
-    gap: 8,
+    gap: getSpacing(8),
     height: '100%',
+    minHeight: scale(54),
+    paddingVertical: 0, // Remove extra vertical padding
   },
   inputWrapperError: {
     borderColor: '#FF3B30',
+    borderWidth: 1.5,
   },
   countryCodeContainer: {
     flexDirection: 'row',
@@ -638,17 +662,23 @@ const styles = StyleSheet.create({
   phoneInputContainer: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'flex-start',
     height: '100%',
+    paddingVertical: 0, // Ensures vertical center
   },
   phoneInput: {
     width: '100%',
     fontFamily: 'Inter',
     fontWeight: '400',
     color: '#1A1A1A',
-    padding: 0,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
     margin: 0,
     textAlignVertical: 'center',
+    textAlign: 'left',
     includeFontPadding: false,
+    fontSize: scaleFont(14, 13, 15), // Reduced size for entered number
+    lineHeight: scaleFont(18, 17, 19), // Adjusted lineHeight for smaller font
     // Font size moved to responsiveStyles
     ...(Platform.OS === 'android' && {
       paddingVertical: 0,
@@ -656,7 +686,6 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'ios' && {
       paddingTop: 0,
       paddingBottom: 0,
-      height: scale(18),
     }),
   },
   noteText: {

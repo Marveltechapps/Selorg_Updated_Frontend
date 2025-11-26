@@ -14,6 +14,7 @@ import type { LocationStackNavigationProp } from '../../types/navigation';
 import Header from '../../components/layout/Header';
 import ClearIcon from '../../assets/images/clear-icon.svg';
 import MapPinIcon from '../../assets/images/map-pin.svg';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface SearchResult {
@@ -63,7 +64,7 @@ const LocationSearchResults: React.FC = () => {
         // Using dummy data for now
         setResults(DUMMY_SEARCH_RESULTS);
       } catch (error) {
-        console.error('Error searching locations:', error);
+        logger.error('Error searching locations', error);
         setResults([]);
       } finally {
         setLoading(false);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import MapPinIcon from '../../../assets/images/map-pin.svg';
-import ChevronRightIcon from '../../../assets/images/chevron-right.svg';
+import MapPinIcon from '@/assets/images/map-pin.svg';
+import ChevronRightIcon from '@/assets/images/chevron-right.svg';
 
 interface DeliveryAddressCardProps {
   address?: string;

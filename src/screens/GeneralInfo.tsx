@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { GeneralInfoStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
+import { logger } from '@/utils/logger';
 import GeneralInfoItem from '../components/GeneralInfoItem';
 
 // Dummy static data - Replace with API call later
@@ -48,7 +49,7 @@ const GeneralInfo: React.FC = () => {
         // Using dummy data for now
         setGeneralInfoItems(DUMMY_GENERAL_INFO_ITEMS);
       } catch (error) {
-        console.error('Error fetching general info items:', error);
+        logger.error('Error fetching general info items', error);
         // Fallback to dummy data
         setGeneralInfoItems(DUMMY_GENERAL_INFO_ITEMS);
       } finally {

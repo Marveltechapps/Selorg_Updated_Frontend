@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import LinearGradient from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import Text from '../common/Text';
 import ProductCard, { Product } from '../features/product/ProductCard';
 import ProductVariantModal, { ProductVariant } from '../features/product/ProductVariantModal';
 import { useCart } from '../../contexts/CartContext';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - ready for API replacement
 const DUMMY_PRODUCTS: Product[] = [
   {
     id: '1',
     name: 'Shimla Apple',
-    image: require('../assets/images/product-image-1.png'),
+    image: require('../../assets/images/product-image-1.png'),
     price: 126,
     originalPrice: 256,
     discount: '16% OFF',
@@ -20,7 +21,7 @@ const DUMMY_PRODUCTS: Product[] = [
   {
     id: '2',
     name: 'Fresh Bananas',
-    image: require('../assets/images/product-image-2.png'),
+    image: require('../../assets/images/product-image-2.png'),
     price: 48,
     originalPrice: 60,
     discount: '20% OFF',
@@ -29,7 +30,7 @@ const DUMMY_PRODUCTS: Product[] = [
   {
     id: '3',
     name: 'Organic Tomatoes',
-    image: require('../assets/images/product-image-3.png'),
+    image: require('../../assets/images/product-image-3.png'),
     price: 80,
     originalPrice: 100,
     discount: '20% OFF',
@@ -38,7 +39,7 @@ const DUMMY_PRODUCTS: Product[] = [
   {
     id: '4',
     name: 'Fresh Carrots',
-    image: require('../assets/images/product-image-4.png'),
+    image: require('../../assets/images/product-image-4.png'),
     price: 45,
     originalPrice: 55,
     discount: '18% OFF',
@@ -47,7 +48,7 @@ const DUMMY_PRODUCTS: Product[] = [
   {
     id: '5',
     name: 'Green Bell Peppers',
-    image: require('../assets/images/product-image-5.png'),
+    image: require('../../assets/images/product-image-5.png'),
     price: 120,
     originalPrice: 150,
     discount: '20% OFF',
@@ -82,7 +83,7 @@ export default function FreshJuiceDealsSection({
           const data = await fetchProducts();
           setProducts(data);
         } catch (error) {
-          console.error('Error fetching products:', error);
+          logger.error('Error fetching products', error);
           // Fallback to dummy data on error
           setProducts(DUMMY_PRODUCTS);
         } finally {
@@ -97,7 +98,7 @@ export default function FreshJuiceDealsSection({
     if (onQuantityPress) {
       onQuantityPress(productId);
     } else {
-      console.log('Quantity selector pressed for product:', productId);
+      logger.info('Quantity selector pressed for product', { productId });
     }
   };
 
@@ -105,7 +106,7 @@ export default function FreshJuiceDealsSection({
     if (onAddPress) {
       onAddPress(productId);
     } else {
-      console.log('Add to cart:', productId);
+      logger.info('Add to cart', { productId });
     }
   };
 
@@ -209,7 +210,7 @@ export default function FreshJuiceDealsSection({
         {
           id: '1',
           size: '500 g',
-          image: require('../assets/images/product-image-1.png'),
+          image: require('../../assets/images/product-image-1.png'),
           price: 126,
           originalPrice: 256,
           discount: '16% OFF',
@@ -218,7 +219,7 @@ export default function FreshJuiceDealsSection({
         {
           id: '2',
           size: '1 kg',
-          image: require('../assets/images/product-image-1.png'),
+          image: require('../../assets/images/product-image-1.png'),
           price: 126,
           originalPrice: 256,
           discount: '16% OFF',
@@ -227,7 +228,7 @@ export default function FreshJuiceDealsSection({
         {
           id: '3',
           size: '2 kg',
-          image: require('../assets/images/product-image-1.png'),
+          image: require('../../assets/images/product-image-1.png'),
           price: 126,
           originalPrice: 256,
           discount: '16% OFF',

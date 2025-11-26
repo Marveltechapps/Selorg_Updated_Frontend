@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { GeneralInfoStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const DUMMY_TERMS_CONTENT = `1. Introduction
@@ -213,7 +214,7 @@ const TermsAndConditions: React.FC = () => {
         // Using dummy data for now
         setContent(DUMMY_TERMS_CONTENT);
       } catch (error) {
-        console.error('Error fetching terms content:', error);
+        logger.error('Error fetching terms content', error);
         // Fallback to dummy data
         setContent(DUMMY_TERMS_CONTENT);
       } finally {

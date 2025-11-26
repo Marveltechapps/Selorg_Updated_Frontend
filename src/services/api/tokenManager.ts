@@ -4,6 +4,7 @@
  */
 
 import * as storage from '../../utils/storage';
+import { logger } from '@/utils/logger';
 
 class TokenManager {
   private accessToken: string | null = null;
@@ -23,7 +24,7 @@ class TokenManager {
       this.refreshToken = await storage.getRefreshToken();
       this.initialized = true;
     } catch (error) {
-      console.error('Error initializing token manager:', error);
+      logger.error('Error initializing token manager', error);
     }
   }
 

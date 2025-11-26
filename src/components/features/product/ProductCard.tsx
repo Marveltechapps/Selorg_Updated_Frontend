@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { RootStackNavigationProp } from '../../../types/navigation';
+import type { RootStackNavigationProp } from '@/types/navigation';
 import Text from '../../common/Text';
 import RupeeIcon from '../../icons/RupeeIcon';
 import PlusIcon from '../../icons/PlusIcon';
 import MinusIcon from '../../icons/MinusIcon';
 import DropdownArrowIcon from '../../icons/DropdownArrowIcon';
-import { useCart } from '../../../contexts/CartContext';
+import { useCart } from '@/contexts/CartContext';
+import { logger } from '@/utils/logger';
 
 export interface Product {
   id: string;
@@ -78,23 +79,23 @@ export default function ProductCard({
   const quantityContainerPaddingHorizontal = 8; // Fixed padding from Figma
   const quantityContainerGap = 4; // Fixed gap from Figma
   const iconSize = 16; // Match modal icon size (16x16)
-  const handleQuantityPress = () => {
+  const handleQuantityPress = useCallback(() => {
     // Always open modal/dropdown when clicking quantity selector
     if (onCardPress) {
       onCardPress(product.id); // Open ProductVariantModal
     } else if (onQuantityPress) {
       onQuantityPress(product.id); // Fallback handler
     } else {
-      console.log('Quantity selector pressed for product:', product.id);
+      logger.info('Quantity selector pressed for product', { productId: product.id });
     }
-  };
+  }, [product.id, onCardPress, onQuantityPress]);
 
-  const handleImagePress = () => {
+  const handleImagePress = useCallback(() => {
     // Navigate to product detail page when clicking product image
     navigation.navigate('ProductDetail', { productId: product.id });
-  };
+  }, [navigation, product.id]);
 
-  const handleAddPress = () => {
+  const handleAddPress = useCallback(() => {
     // Add button adds item to cart with first/active variant
     // Fix both issues: prevent flicker (2→1) and ensure single click works
     if (activeVariantId && variants.length > 0) {
@@ -141,35 +142,35 @@ export default function ProductCard({
     } else if (onAddPress) {
       onAddPress(product.id);
     } else {
-      console.log('Add to cart:', product.id);
+      logger.info('Add to cart', { productId: product.id });
     }
-  };
+  }, [activeVariantId, variants, getItemQuantity, cartItems, addToCart, updateQuantity, product, onAddPress]);
 
-  const handleAddButtonDecrease = (e: any) => {
+  const handleAddButtonDecrease = useCallback((e: any) => {
     e?.stopPropagation?.();
     if (activeVariantId && cartQuantity > 0) {
       const newQuantity = cartQuantity - 1;
       updateQuantity(activeVariantId, newQuantity);
     }
-  };
+  }, [activeVariantId, cartQuantity, updateQuantity]);
 
-  const handleAddButtonIncrease = (e: any) => {
+  const handleAddButtonIncrease = useCallback((e: any) => {
     e?.stopPropagation?.();
     if (activeVariantId && cartQuantity >= 0) {
       const newQuantity = cartQuantity + 1;
       updateQuantity(activeVariantId, newQuantity);
     }
-  };
+  }, [activeVariantId, cartQuantity, updateQuantity]);
 
-  const handleDecrease = (e: any) => {
+  const handleDecrease = useCallback((e: any) => {
     e?.stopPropagation?.();
     if (activeVariantId && cartQuantity > 0) {
       const newQuantity = cartQuantity - 1;
       updateQuantity(activeVariantId, newQuantity);
     }
-  };
+  }, [activeVariantId, cartQuantity, updateQuantity]);
 
-  const handleIncrease = (e: any) => {
+  const handleIncrease = useCallback((e: any) => {
     e?.stopPropagation?.();
     if (activeVariantId && cartQuantity >= 0) {
       const newQuantity = cartQuantity + 1;
@@ -178,7 +179,7 @@ export default function ProductCard({
       // If no variant selected or not in cart, open modal
       handleQuantityPress();
     }
-  };
+  }, [activeVariantId, cartQuantity, updateQuantity, handleQuantityPress]);
 
   return (
     <View style={[styles.container, width ? { width, maxWidth: width } : null]}>

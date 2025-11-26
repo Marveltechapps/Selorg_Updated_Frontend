@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RefundsStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface Product {
@@ -81,7 +82,7 @@ const RefundDetails: React.FC = () => {
         const data = DUMMY_REFUND_DETAILS[orderNumber] || null;
         setRefundDetails(data);
       } catch (error) {
-        console.error('Error fetching refund details:', error);
+        logger.error('Error fetching refund details', error);
         setRefundDetails(null);
       } finally {
         setLoading(false);

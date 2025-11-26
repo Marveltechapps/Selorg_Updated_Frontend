@@ -14,9 +14,9 @@ interface WhyMoringaSectionProps {
 export default function WhyMoringaSection({
   title = 'WHY MORINGA?',
   description = 'Packed with 92 nutrients, 46 antioxidants, and 100% ancient wisdom',
-  leafImage1 = require('../assets/images/why-moringa-leaf-1-350e8c.png'),
-  leafImage2 = require('../assets/images/why-moringa-leaf-2-350e8c.png'),
-  mainImage = require('../assets/images/why-moringa-main-4971eb.png'),
+  leafImage1 = require('../../assets/images/why-moringa-leaf-1-350e8c.png'),
+  leafImage2 = require('../../assets/images/why-moringa-leaf-2-350e8c.png'),
+  mainImage = require('../../assets/images/why-moringa-main-4971eb.png'),
 }: WhyMoringaSectionProps) {
   // Responsive dimensions - calculated using responsive utilities
   const sectionDimensions = useMemo(() => {

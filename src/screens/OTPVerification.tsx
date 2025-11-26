@@ -12,13 +12,14 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Header from '../components/layout/Header';
 import OTPIconContainer from '../assets/images/otp-icon-container.svg';
 import type { RootStackParamList } from '../types/navigation';
 import { useDimensions, scale, scaleFont, getSpacing, getBorderRadius, wp } from '../utils/responsive';
+import { logger } from '@/utils/logger';
 
 type OTPVerificationRouteProp = RouteProp<RootStackParamList, 'OTPVerification'>;
 
@@ -29,6 +30,7 @@ const OTPVerification: React.FC<OTPVerificationScreenProps> = () => {
   const route = useRoute<OTPVerificationRouteProp>();
   const phoneNumber = route.params?.phoneNumber || '+91 9876543210';
   const { width } = useDimensions();
+  const insets = useSafeAreaInsets();
   
   const [otp, setOtp] = useState<string[]>(['', '', '', '']);
   const [timer, setTimer] = useState<number>(50); // seconds
@@ -429,16 +431,16 @@ const OTPVerification: React.FC<OTPVerificationScreenProps> = () => {
       // }
 
       // Dummy implementation for now
-      console.log('Verifying OTP:', otpCode, 'for', phoneNumber);
+      logger.info('Verifying OTP', { otpCode, phoneNumber });
       
       // Simulate API call delay
       await new Promise<void>(resolve => setTimeout(resolve, 1000));
       
       // Navigate to VerificationSuccess screen
       navigation.replace('VerificationSuccess');
-      console.log('OTP verified successfully');
+      logger.info('OTP verified successfully');
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      logger.error('Error verifying OTP', error);
       setError('Failed to verify OTP. Please try again.');
     } finally {
       setLoading(false);
@@ -462,11 +464,11 @@ const OTPVerification: React.FC<OTPVerificationScreenProps> = () => {
       //   body: JSON.stringify({ phoneNumber }),
       // });
       
-      console.log('Resending OTP to:', phoneNumber);
+      logger.info('Resending OTP', { phoneNumber });
       await new Promise<void>(resolve => setTimeout(resolve, 500));
       setOtp(['', '', '', '']); // Clear OTP inputs
     } catch (error) {
-      console.error('Error resending OTP:', error);
+      logger.error('Error resending OTP', error);
       setError('Failed to resend OTP. Please try again.');
     } finally {
       setLoading(false);
@@ -477,14 +479,18 @@ const OTPVerification: React.FC<OTPVerificationScreenProps> = () => {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+        enabled={Platform.OS === 'ios'}
       >
         <ScrollView
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: getSpacing(20) }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          bounces={false}
         >
           {/* Header */}
           <Header title="Verify OTP" />
@@ -601,6 +607,8 @@ const OTPVerification: React.FC<OTPVerificationScreenProps> = () => {
                             textAlign="center"
                             selectTextOnFocus
                             autoFocus={index === 0}
+                            returnKeyType={index === 3 ? 'done' : 'next'}
+                            blurOnSubmit={false}
                           />
                         </Animated.View>
                       </Animated.View>
@@ -626,7 +634,7 @@ const OTPVerification: React.FC<OTPVerificationScreenProps> = () => {
           </View>
 
           {/* Action Container */}
-          <View style={[styles.actionContainer, responsiveStyles.actionContainer]}>
+          <View style={[styles.actionContainer, responsiveStyles.actionContainer, { paddingBottom: Math.max(insets.bottom, getSpacing(24)) }]}>
             <TouchableOpacity
               style={[
                 styles.verifyButton,
@@ -686,6 +694,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'flex-start',
   },
   contentContainer: {
     flex: 1,
@@ -789,16 +798,20 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#1A1A1A',
     textAlign: 'center',
-    padding: 0,
+    textAlignVertical: 'center',
+    paddingHorizontal: 0,
+    paddingVertical: 0,
     margin: 0,
     includeFontPadding: false,
     // Font size moved to responsiveStyles
     ...(Platform.OS === 'android' && {
       paddingVertical: 0,
+      lineHeight: scaleFont(20, 18, 22),
     }),
     ...(Platform.OS === 'ios' && {
       paddingTop: 0,
       paddingBottom: 0,
+      lineHeight: scaleFont(20, 18, 22),
     }),
   },
   errorText: {

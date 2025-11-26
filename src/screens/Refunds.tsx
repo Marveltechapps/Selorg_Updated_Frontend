@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { RefundsStackNavigationProp } from '../types/navigation';
 import Header from '../components/layout/Header';
 import NoRefundsIcon from '../assets/images/no-refunds-icon.svg';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface RefundItem {
@@ -60,7 +61,7 @@ const Refunds: React.FC = () => {
         // setRefunds([]); // Empty state
         setRefunds(DUMMY_REFUNDS); // With data state
       } catch (error) {
-        console.error('Error fetching refunds:', error);
+        logger.error('Error fetching refunds', error);
         // Fallback to empty state
         setRefunds([]);
       } finally {
@@ -71,23 +72,17 @@ const Refunds: React.FC = () => {
     fetchRefunds();
   }, []);
 
-  const handleBackPress = () => {
-    if (onBackPress) {
-      onBackPress();
-    } else {
-      console.log('Navigate back');
-    }
-  };
+  const handleBackPress = useCallback(() => {
+    logger.info('Navigate back');
+  }, []);
 
-  const handleViewDetails = (orderNumber: string) => {
-    if (onViewDetails) {
-      onViewDetails(orderNumber);
-    } else {
-      console.log('View details for:', orderNumber);
-    }
-  };
+  const handleViewDetails = useCallback((orderNumber: string) => {
+    logger.info('View details for', { orderNumber });
+  }, []);
 
-  const renderRefundCard = ({ item }: { item: RefundItem }) => {
+  const keyExtractor = useCallback((item: RefundItem) => item.id, []);
+
+  const renderRefundCard = useCallback(({ item }: { item: RefundItem }) => {
     const getStatusBadgeStyle = () => {
       switch (item.status) {
         case 'completed':
@@ -125,7 +120,7 @@ const Refunds: React.FC = () => {
         </TouchableOpacity>
       </View>
     );
-  };
+  }, [handleViewDetails]);
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
@@ -161,7 +156,7 @@ const Refunds: React.FC = () => {
             <FlatList
               data={refunds}
               renderItem={renderRefundCard}
-              keyExtractor={(item) => item.id}
+              keyExtractor={keyExtractor}
               scrollEnabled={false}
               ItemSeparatorComponent={() => <View style={styles.separator} />}
             />

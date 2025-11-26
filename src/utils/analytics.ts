@@ -18,7 +18,7 @@ class Analytics {
     try {
       this.enabled = getEnvConfigSafe().enableAnalytics;
     } catch (error) {
-      console.warn('Error getting analytics config, defaulting to enabled:', error);
+      logger.warn('Error getting analytics config, defaulting to enabled', error);
       this.enabled = true;
     }
   }

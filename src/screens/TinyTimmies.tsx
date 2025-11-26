@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, Platform, ScrollView, TouchableOpacity, Image, ImageSourcePropType } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { RootStackNavigationProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import SearchIcon from '../components/icons/SearchIcon';
@@ -12,6 +12,7 @@ import TinyTummiesCategoryCard, { TinyTummiesCategory } from '../components/Tiny
 import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
 import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 import DealsSection from '../components/sections/DealsSection';
+import { logger } from '@/utils/logger';
 import { useCart } from '../contexts/CartContext';
 import { useDimensions, scale, scaleFont, getSpacing, getBorderRadius, wp } from '../utils/responsive';
 
@@ -141,7 +142,7 @@ export default function TinyTimmiesScreen({
   onAddPress,
   onSearchPress,
   onCategoryPress,
-}: TinyTimmiesScreenProps = {}) {
+}: TinyTimmiesScreenProps = {} as TinyTimmiesScreenProps) {
   const navigation = useNavigation<RootStackNavigationProp>();
   const { addToCart, updateQuantity, getItemQuantity, cartItems } = useCart();
   const [tinyTimmiesData, setTinyTimmiesData] = useState<TinyTimmiesData>(DUMMY_TINY_TIMMIES);
@@ -159,7 +160,7 @@ export default function TinyTimmiesScreen({
           const data = await fetchTinyTimmiesData();
           setTinyTimmiesData(data);
         } catch (error) {
-          console.error('Error fetching tiny-timmies data:', error);
+          logger.error('Error fetching tiny-timmies data', error);
           // Fallback to dummy data on error
           setTinyTimmiesData(DUMMY_TINY_TIMMIES);
         } finally {
@@ -170,69 +171,77 @@ export default function TinyTimmiesScreen({
     }
   }, [fetchTinyTimmiesData]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
-  const handleSearchPress = () => {
+  const handleSearchPress = useCallback(() => {
     if (onSearchPress) {
       onSearchPress();
     } else {
       navigation.navigate('Search');
     }
-  };
+  }, [navigation, onSearchPress]);
 
-  const handleProductPress = (productId: string) => {
+  const handleProductPress = useCallback((productId: string) => {
     if (onProductPress) {
       onProductPress(productId);
     } else {
       navigation.navigate('ProductDetail', { productId });
     }
-  };
+  }, [navigation, onProductPress]);
 
-  const handleCardPress = (productId: string) => {
+  const handleCardPress = useCallback((productId: string) => {
     // Open ProductVariantModal when dropdown is clicked
     setSelectedProductId(productId);
     setModalVisible(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setModalVisible(false);
     setSelectedProductId(null);
-  };
+  }, []);
 
-  const handleVariantSelect = (variantId: string) => {
-    if (selectedProductId) {
-      // Update selected variant for this product (synchronization)
-      setProductSelectedVariants(prev => ({
-        ...prev,
-        [selectedProductId]: variantId,
-      }));
-    }
-  };
+  const handleVariantSelect = useCallback((variantId: string) => {
+    setProductSelectedVariants(prev => {
+      if (selectedProductId) {
+        return {
+          ...prev,
+          [selectedProductId]: variantId,
+        };
+      }
+      return prev;
+    });
+  }, [selectedProductId]);
 
-  const handleAddToCart = (variantId: string) => {
-    if (selectedProductId) {
-      // Update selected variant when adding to cart (synchronization)
-      setProductSelectedVariants(prev => ({
-        ...prev,
-        [selectedProductId]: variantId,
-      }));
-    }
-  };
+  const handleAddToCart = useCallback((variantId: string) => {
+    setProductSelectedVariants(prev => {
+      if (selectedProductId) {
+        return {
+          ...prev,
+          [selectedProductId]: variantId,
+        };
+      }
+      return prev;
+    });
+  }, [selectedProductId]);
 
-  const handleQuantityChange = (variantId: string, quantity: number) => {
+  const handleQuantityChange = useCallback((variantId: string, quantity: number) => {
     // Quantity changes are handled by the modal itself through cart context
-  };
+  }, []);
 
-  const handleCategoryPress = (categoryId: string) => {
+  const handleCategoryPress = useCallback((categoryId: string) => {
     if (onCategoryPress) {
       onCategoryPress(categoryId);
     } else {
-      console.log('Category pressed:', categoryId);
+      logger.info('Category pressed', { categoryId });
       // Navigate to category products page
     }
-  };
+  }, [onCategoryPress]);
+
+  const handleCheckoutPress = useCallback(() => {
+    navigation.navigate('Checkout');
+  }, [navigation]);
 
   // Get variants for a product
   const getVariantsForProduct = (productId: string): Array<{ id: string; size: string }> => {
@@ -410,7 +419,7 @@ export default function TinyTimmiesScreen({
                 <View style={{ width: firstCardWidth }}>
                   <TinyTummiesCategoryCard
                     category={tinyTimmiesData.categories[0]}
-                    onPress={() => handleCategoryPress(tinyTimmiesData.categories[0].id)}
+                    onPress={() => handleCategoryPress(tinyTimmiesData.categories[0]?.id || '')}
                     width={firstCardWidth}
                     height={firstCardHeight}
                   />
@@ -421,7 +430,7 @@ export default function TinyTimmiesScreen({
                 {tinyTimmiesData.categories[1] && (
                   <TinyTummiesCategoryCard
                     category={tinyTimmiesData.categories[1]}
-                    onPress={() => handleCategoryPress(tinyTimmiesData.categories[1].id)}
+                    onPress={() => handleCategoryPress(tinyTimmiesData.categories[1]?.id || '')}
                     width={secondColumnWidth}
                     height={stackedCardHeight}
                   />
@@ -429,7 +438,7 @@ export default function TinyTimmiesScreen({
                 {tinyTimmiesData.categories[2] && (
                   <TinyTummiesCategoryCard
                     category={tinyTimmiesData.categories[2]}
-                    onPress={() => handleCategoryPress(tinyTimmiesData.categories[2].id)}
+                    onPress={() => handleCategoryPress(tinyTimmiesData.categories[2]?.id || '')}
                     width={secondColumnWidth}
                     height={stackedCardHeight}
                   />
@@ -485,7 +494,7 @@ export default function TinyTimmiesScreen({
         </ScrollView>
 
         {/* Floating Cart Bar */}
-        <FloatingCartBar onPress={() => navigation.navigate('Checkout')} hasBottomNav={false} />
+        <FloatingCartBar onPress={handleCheckoutPress} hasBottomNav={false} />
 
         {/* Product Variant Modal */}
         {selectedProduct && (

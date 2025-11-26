@@ -85,5 +85,13 @@ export const endpoints = {
     markRead: (id: string) => `${API_VERSION}/notifications/${id}/read`,
     markAllRead: `${API_VERSION}/notifications/read-all`,
   },
+
+  // Onboarding endpoints
+  onboarding: {
+    pages: `${API_VERSION}/onboarding/pages`,
+    pageByNumber: (pageNumber: number) => `${API_VERSION}/onboarding/pages/${pageNumber}`,
+    complete: `${API_VERSION}/onboarding/complete`,
+    status: `${API_VERSION}/onboarding/status`,
+  },
 } as const;
 

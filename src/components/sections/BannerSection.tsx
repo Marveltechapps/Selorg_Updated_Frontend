@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { View, StyleSheet, Image, ImageSourcePropType, ScrollView, Animated, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { logger } from '@/utils/logger';
 import type { RootStackNavigationProp } from '../../types/navigation';
 import { getWindowDimensions, getSpacing } from '../../utils/responsive';
 
 // Exact image from Figma - banner-section-297a1c.png
-// Update to use exact image once downloaded: require('../assets/images/banner-section-297a1c.png')
-const BANNER_IMAGE = require('../assets/images/banner-section-297a1c.png'); // Placeholder
+// Update to use exact image once downloaded: require('../../assets/images/banner-section-297a1c.png')
+const BANNER_IMAGE = require('../../assets/images/banner-section-297a1c.png'); // Placeholder
 
 // Dummy static data - ready for API replacement
 const DUMMY_BANNERS: ImageSourcePropType[] = [
@@ -68,7 +69,7 @@ export default function BannerSection({
           const data = await fetchBannerData();
           setBannerImages(data);
         } catch (error) {
-          console.error('Error fetching banner data:', error);
+          logger.error('Error fetching banner data', error);
           // Fallback to provided banners or dummy data
           setBannerImages(banners || DUMMY_BANNERS);
         } finally {

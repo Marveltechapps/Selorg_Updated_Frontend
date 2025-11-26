@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, Platform, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -7,7 +7,9 @@ import BackIcon from '../components/icons/BackIcon';
 import Text from '../components/common/Text';
 import ProductCard, { Product } from '../components/features/product/ProductCard';
 import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
+import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 import { useCart } from '../contexts/CartContext';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - ready for API replacement
 const ALL_SEARCH_PRODUCTS: Product[] = [
@@ -107,7 +109,7 @@ export default function SearchResultsScreen({
             const data = await fetchProducts(searchText);
             setProducts(data);
           } catch (error) {
-            console.error('Error fetching products:', error);
+            logger.error('Error fetching products', error);
             // Fallback to dummy data on error
             const filtered = ALL_SEARCH_PRODUCTS.filter(item =>
               item.name.toLowerCase().includes(searchText.toLowerCase())
@@ -131,34 +133,34 @@ export default function SearchResultsScreen({
     }
   }, [searchText, fetchProducts]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setSearchText('');
     setProducts([]);
-  };
+  }, []);
 
-  const handleQuantityPress = (productId: string) => {
+  const handleQuantityPress = useCallback((productId: string) => {
     if (onQuantityPress) {
       onQuantityPress(productId);
     } else {
-      console.log('Quantity selector pressed for product:', productId);
+      logger.info('Quantity selector pressed for product', { productId });
     }
-  };
+  }, [onQuantityPress]);
 
-  const handleAddPress = (productId: string) => {
+  const handleAddPress = useCallback((productId: string) => {
     if (onAddPress) {
       onAddPress(productId);
     } else {
-      console.log('Add to cart:', productId);
+      logger.info('Add to cart', { productId });
     }
-  };
+  }, [onAddPress]);
 
-  const handleSearchChange = (text: string) => {
+  const handleSearchChange = useCallback((text: string) => {
     setSearchText(text);
-  };
+  }, []);
 
   // Get selected product for modal
   const selectedProduct = products.find((p) => p.id === selectedProductId);
@@ -276,6 +278,9 @@ export default function SearchResultsScreen({
                     value={searchText}
                     onChangeText={handleSearchChange}
                     returnKeyType="search"
+                    textAlignVertical="center"
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
                   />
                 </View>
 
@@ -360,6 +365,9 @@ export default function SearchResultsScreen({
             onQuantityChange={handleQuantityChange}
           />
         )}
+
+        {/* Floating Cart Bar */}
+        <FloatingCartBar onPress={() => navigation.navigate('Checkout')} hasBottomNav={false} />
       </SafeAreaView>
     </View>
   );
@@ -394,17 +402,18 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
-    alignItems: 'stretch',
+    alignItems: 'center', // Center all items vertically
     alignSelf: 'stretch',
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 0,
-    height: 40,
+    borderRadius: 8.5,
+    paddingHorizontal: 12,
+    paddingVertical: 0, // Remove vertical padding to use alignItems: center
+    minHeight: 48,
+    height: 48,
   },
   backButton: {
     width: 32,
-    height: 40,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
@@ -413,25 +422,30 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center', // Center content vertically
     gap: 4,
-    height: 22.39,
     alignSelf: 'center',
+    height: '100%', // Full height of parent container
   },
   searchInput: {
     flex: 1,
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '400',
-    lineHeight: 20,
+    lineHeight: 18, // Slightly larger than fontSize (14 * 1.28 ≈ 18)
     color: '#3B3B3B',
-    padding: 0,
+    paddingHorizontal: 0, // Horizontal padding handled by container
+    paddingVertical: 0, // No vertical padding for perfect centering
     margin: 0,
     textAlign: 'left',
-    height: 22.39,
+    textAlignVertical: 'center', // Vertically center text
+    includeFontPadding: false, // Remove extra font padding
+    numberOfLines: 1, // Single line, no wrapping
+    ellipsizeMode: 'tail', // Ellipsize if too long
   },
   clearButton: {
     width: 32,
-    height: 40,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,

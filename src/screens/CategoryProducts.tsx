@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -20,6 +20,7 @@ import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 import ProductVariantModal, { ProductVariant } from '../components/features/product/ProductVariantModal';
 import { useCart } from '../contexts/CartContext';
 import { useDimensions, getSpacing, scale } from '../utils/responsive';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - ready for API replacement
 interface SubCategory {
@@ -252,7 +253,7 @@ export default function CategoryProductsScreen({
             setSelectedSubCategoryId(data[0].id);
           }
         } catch (error) {
-          console.error('Error fetching sub-categories:', error);
+          logger.error('Error fetching sub-categories', error);
           setSubCategories(DUMMY_SUB_CATEGORIES);
         } finally {
           setLoading(false);
@@ -269,7 +270,7 @@ export default function CategoryProductsScreen({
           const data = await fetchBanners();
           setBanners(data);
         } catch (error) {
-          console.error('Error fetching banners:', error);
+          logger.error('Error fetching banners', error);
           setBanners(DUMMY_BANNERS);
         }
       };
@@ -285,7 +286,7 @@ export default function CategoryProductsScreen({
           const data = await fetchProducts(selectedSubCategoryId);
           setProducts(data);
         } catch (error) {
-          console.error('Error fetching products:', error);
+          logger.error('Error fetching products', error);
           setProducts(DUMMY_PRODUCTS[selectedSubCategoryId] || []);
         } finally {
           setLoading(false);
@@ -298,58 +299,60 @@ export default function CategoryProductsScreen({
     }
   }, [selectedSubCategoryId, fetchProducts]);
 
-  const handleBackPress = () => {
+  const handleBackPress = useCallback(() => {
     navigation.goBack();
-  };
+  }, [navigation]);
 
-  const handleSearch = () => {
+  const handleSearch = useCallback(() => {
     if (onSearchPress) {
       onSearchPress();
     } else {
       navigation.navigate('Search');
     }
-  };
+  }, [navigation, onSearchPress]);
 
-  const handleSubCategoryPress = (subCategoryId: string) => {
+  const handleSubCategoryPress = useCallback((subCategoryId: string) => {
     setSelectedSubCategoryId(subCategoryId);
-  };
+  }, []);
 
-  const handleQuantityPress = (productId: string) => {
+  const handleQuantityPress = useCallback((productId: string) => {
     if (onQuantityPress) {
       onQuantityPress(productId);
     } else {
-      console.log('Quantity selector pressed for product:', productId);
+      logger.info('Quantity selector pressed for product', { productId });
     }
-  };
+  }, [onQuantityPress]);
 
-  const handleAddPress = (productId: string) => {
+  const handleAddPress = useCallback((productId: string) => {
     if (onAddPress) {
       onAddPress(productId);
     } else {
-      console.log('Add to cart:', productId);
+      logger.info('Add to cart', { productId });
     }
-  };
+  }, [onAddPress]);
 
-  const handleCardPress = (productId: string) => {
+  const handleCardPress = useCallback((productId: string) => {
     // Open ProductVariantModal when dropdown is clicked
     setSelectedProductId(productId);
     setModalVisible(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setModalVisible(false);
     setSelectedProductId(null);
-  };
+  }, []);
 
-  const handleVariantSelect = (variantId: string) => {
-    if (selectedProductId) {
-      // Update selected variant for this product (synchronization)
-      setProductSelectedVariants(prev => ({
-        ...prev,
-        [selectedProductId]: variantId,
-      }));
-    }
-  };
+  const handleVariantSelect = useCallback((variantId: string) => {
+    setProductSelectedVariants(prev => {
+      if (selectedProductId) {
+        return {
+          ...prev,
+          [selectedProductId]: variantId,
+        };
+      }
+      return prev;
+    });
+  }, [selectedProductId]);
 
   const handleAddToCart = (variantId: string) => {
     if (selectedProductId) {

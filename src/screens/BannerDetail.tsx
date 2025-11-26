@@ -12,6 +12,7 @@ import ProductVariantModal, { ProductVariant } from '../components/features/prod
 import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 import { useCart } from '../contexts/CartContext';
 import { useDimensions, getSpacing } from '../utils/responsive';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - ready for API replacement
 interface BannerDetailData {
@@ -121,7 +122,7 @@ export default function BannerDetailScreen({
           const data = await fetchBannerDetail(params.bannerId);
           setBannerData(data);
         } catch (error) {
-          console.error('Error fetching banner detail:', error);
+          logger.error('Error fetching banner detail', error);
           // Fallback to dummy data on error
           if (params.title) {
             setBannerData({
@@ -161,7 +162,7 @@ export default function BannerDetailScreen({
     if (onProductPress) {
       onProductPress(productId);
     } else {
-      console.log('Product pressed:', productId);
+      logger.info('Product pressed', { productId });
     }
   };
 
@@ -169,7 +170,7 @@ export default function BannerDetailScreen({
     if (onQuantityPress) {
       onQuantityPress(productId);
     } else {
-      console.log('Quantity selector pressed for product:', productId);
+      logger.info('Quantity selector pressed for product', { productId });
     }
   };
 
@@ -177,7 +178,7 @@ export default function BannerDetailScreen({
     if (onAddPress) {
       onAddPress(productId);
     } else {
-      console.log('Add to cart:', productId);
+      logger.info('Add to cart', { productId });
     }
   };
 

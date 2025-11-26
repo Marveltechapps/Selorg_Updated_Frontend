@@ -1,6 +1,9 @@
 /**
  * Environment Configuration
  * Manages environment variables using expo-constants
+ * 
+ * Note: This file does not use the logger utility to avoid circular dependencies.
+ * Logger depends on env.ts, so env.ts uses console directly for error reporting.
  */
 
 import Constants from 'expo-constants';
@@ -36,7 +39,12 @@ const getConfigValue = (key: string, defaultValue: string): string => {
     }
     return defaultValue;
   } catch (error) {
-    console.warn(`Error accessing config key ${key}:`, error);
+    // Use console directly to avoid circular dependency with logger
+    // Only log in development to avoid noise in production
+    // @ts-ignore - __DEV__ is a global defined by React Native/Metro bundler
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.warn(`[env] Error accessing config key ${key}:`, error);
+    }
     return defaultValue;
   }
 };
@@ -56,7 +64,12 @@ export const getEnvConfig = (): EnvConfig => {
       enableAnalytics: getConfigValue('enableAnalytics', 'true') === 'true',
     };
   } catch (error) {
-    console.error('Error getting environment config, using defaults:', error);
+    // Use console directly to avoid circular dependency with logger
+    // Only log in development to avoid noise in production
+    // @ts-ignore - __DEV__ is a global defined by React Native/Metro bundler
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.error('[env] Error getting environment config, using defaults:', error);
+    }
     return DEFAULT_CONFIG;
   }
 };

@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { VideoView, useVideoPlayer } from 'expo-av';
-import LinearGradient from 'expo-linear-gradient';
+import React, { useRef, useState, useMemo, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Video } from 'expo-av';
+import Constants from 'expo-constants';
 import LocationSelector from '../features/location/LocationSelector';
 import SearchBar from '../features/search/SearchBar';
 import ProfileIconHome from '../icons/ProfileIconHome';
 import MuteIcon from '../icons/MuteIcon';
 import UnmuteIcon from '../icons/UnmuteIcon';
-import { TouchableOpacity } from 'react-native';
-import { useDimensions, scale, getSpacing, wp, hp } from '../../utils/responsive';
+import { useDimensions, scale, getSpacing, wp } from '../../utils/responsive';
+import { logger } from '@/utils/logger';
 
 interface TopSectionProps {
   deliveryType?: string;
@@ -19,7 +20,14 @@ interface TopSectionProps {
   onSearch?: (text: string) => void;
   onLayout?: (layout: { y: number; height: number }) => void;
   isVisible?: boolean;
+  isScreenFocused?: boolean; // New prop to track screen focus
 }
+
+// Video source - using the video file from assets/videos
+const homepageVideo = require('../../assets/videos/homepage_video.mp4');
+
+// Check if running in Expo Go
+const isExpoGo = Constants.appOwnership === 'expo';
 
 export default function TopSection({
   deliveryType = 'Delivery to Home',
@@ -30,114 +38,139 @@ export default function TopSection({
   onSearch,
   onLayout,
   isVisible = true,
+  isScreenFocused = true,
 }: TopSectionProps) {
-  const { width: screenWidth, height: screenHeight } = useDimensions();
+  const { width: screenWidth } = useDimensions();
   const videoContainerRef = useRef<View>(null);
-  const [videoLayout, setVideoLayout] = useState({ y: 0, height: 0 });
-  const [isMuted, setIsMuted] = useState(false);
-  const [videoError, setVideoError] = useState(false);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  
-  // Use expo-av video player
-  const player = useVideoPlayer(require('../assets/images/categories/video-section-png.mp4'), (player) => {
-    player.loop = true;
-    player.muted = isMuted;
-    player.play();
-  });
+  const videoRef = useRef<Video>(null);
+  const [isMuted, setIsMuted] = useState(false); // Audio state
 
+  // Video container height - explicit height for proper layout
+  const VIDEO_CONTAINER_HEIGHT = 400; // Increased by another 20% (300 * 1.20 = 360)
+  
   // Responsive video dimensions - maintain aspect ratio from design (340/381)
   const videoDimensions = useMemo(() => {
     const baseVideoHeight = (340 / 381) * screenWidth; // Maintain aspect ratio
     const videoHeight = baseVideoHeight * 1.35; // Increase by 35%
     const fadeGradientHeight = videoHeight * 0.05; // 5% fade at top of video
-    const videoTopPadding = videoHeight * 0.15; // 15% padding at top of video
-    const visibleVideoHeight = videoHeight * 0.85; // Show top 85% (cut bottom 15%)
     
     return {
       videoHeight,
       fadeGradientHeight,
-      videoTopPadding,
-      visibleVideoHeight: visibleVideoHeight - 20 + videoTopPadding,
+      containerHeight: VIDEO_CONTAINER_HEIGHT,
     };
   }, [screenWidth]);
 
-  // Control video playback based on visibility
-  useEffect(() => {
-    if (player) {
-      if (isVisible) {
-        player.play();
-      } else {
-        player.pause();
-      }
-    }
-  }, [isVisible, player]);
-
-  // Update mute state
-  useEffect(() => {
-    if (player) {
-      player.muted = isMuted;
-    }
-  }, [isMuted, player]);
-
-  const handleMuteToggle = () => {
-    setIsMuted(!isMuted);
-  };
-
   const handleVideoLayout = (event: any) => {
     const { y, height } = event.nativeEvent.layout;
-    setVideoLayout({ y, height });
     if (onLayout) {
       onLayout({ y, height });
     }
   };
 
+  // Control video playback and mute based on visibility
+  useEffect(() => {
+    if (!videoRef.current || isExpoGo) return;
+    
+    const controlPlayback = async () => {
+      try {
+        if (isVisible) {
+          await videoRef.current?.playAsync();
+          logger.info('Video resumed');
+        } else {
+          // When video is not visible: pause and auto-mute
+          await videoRef.current?.pauseAsync();
+          setIsMuted(true); // Auto-mute when not visible
+          logger.info('Video paused and muted (not visible)');
+        }
+      } catch (error: any) {
+        logger.warn('Error controlling video playback', error);
+      }
+    };
+    
+    controlPlayback();
+  }, [isVisible]);
+
+  // Auto-mute when screen loses focus (navigating away)
+  useEffect(() => {
+    if (!videoRef.current || isExpoGo) return;
+    
+    const handleScreenBlur = async () => {
+      try {
+        if (!isScreenFocused) {
+          // Screen lost focus - pause and mute video
+          await videoRef.current?.pauseAsync();
+          setIsMuted(true);
+          logger.info('Video paused and muted (screen lost focus)');
+        }
+      } catch (error: any) {
+        logger.warn('Error handling screen blur', error);
+      }
+    };
+    
+    handleScreenBlur();
+  }, [isScreenFocused]);
+
+  // Toggle audio mute/unmute
+  const handleToggleAudio = () => {
+    setIsMuted((prev) => !prev);
+    logger.info('Audio toggled', { muted: !isMuted });
+  };
+
   return (
     <View style={styles.container}>
-      {/* Video Section - Starts from top-0, beneath content */}
+      {/* Video Container - Relative position with explicit height */}
       <View 
         ref={videoContainerRef}
-        style={[styles.videoContainer, { 
-          height: videoDimensions.visibleVideoHeight,
-          paddingTop: videoDimensions.videoTopPadding 
-        }]}
+        style={[
+          styles.videoContainer, 
+          { 
+            height: videoDimensions.containerHeight,
+          }
+        ]}
         onLayout={handleVideoLayout}
       >
-        {player && !videoError ? (
-          <>
-            <VideoView
-              player={player}
-              style={[styles.backgroundVideo, { height: videoDimensions.videoHeight, top: scale(-20) }]}
-              contentFit="cover"
-              nativeControls={false}
-              onLoadStart={() => {
-                console.log('[TopSection] Video load started');
-                setVideoLoaded(false);
-                setVideoError(false);
-              }}
-              onLoad={() => {
-                console.log('[TopSection] Video loaded successfully');
-                setVideoLoaded(true);
-                setVideoError(false);
-              }}
-              onError={(error: any) => {
-                console.error('[TopSection] Video playback error:', error);
-                setVideoError(true);
-                setVideoLoaded(false);
-              }}
-            />
+        {/* Green Background Layer - Bottom (zIndex: 0) */}
+        <View 
+          style={[
+            styles.greenBackground, 
+            { height: videoDimensions.containerHeight }
+          ]} 
+        />
 
+        {/* Video - Absolute position to overlay text */}
+        {!isExpoGo ? (
+          // Video Player (dev/prod builds)
+          <>
+            <Video
+              ref={videoRef}
+              source={homepageVideo}
+              style={[
+                styles.backgroundVideo, 
+                { 
+                  height: videoDimensions.containerHeight,
+                }
+              ]}
+              resizeMode={'cover' as any}
+              isLooping
+              shouldPlay={isVisible}
+              isMuted={isMuted}
+              useNativeControls={false}
+            />
             {/* White gradient at top of video (top to 5%) */}
             <LinearGradient
               colors={['#FFFFFF', 'rgba(255, 255, 255, 0)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={[styles.videoFadeGradient, { height: videoDimensions.fadeGradientHeight }]}
+              style={[
+                styles.videoFadeGradient, 
+                { height: videoDimensions.fadeGradientHeight }
+              ]}
             />
-
-            {/* Mute/Unmute Button - Bottom Right Corner */}
+            {/* Audio Toggle Button - Right Bottom */}
             <TouchableOpacity
-              style={styles.muteButton}
-              onPress={handleMuteToggle}
+              style={styles.audioToggleButton}
+              onPress={handleToggleAudio}
               activeOpacity={0.7}
             >
               {isMuted ? (
@@ -148,19 +181,34 @@ export default function TopSection({
             </TouchableOpacity>
           </>
         ) : (
-          // Fallback: Show placeholder image or gradient background
-          <View style={[styles.backgroundVideo, { height: videoDimensions.videoHeight, top: scale(-20), backgroundColor: '#034703' }]}>
+          // Placeholder (Expo Go)
+          <>
+            <View style={[
+              styles.backgroundVideo, 
+              { 
+                height: videoDimensions.containerHeight,
+                backgroundColor: 'transparent' 
+              }
+            ]}>
+              <View style={styles.placeholderContent}>
+                <Text style={styles.placeholderText}>Video not available in Expo Go</Text>
+              </View>
+            </View>
+            {/* White gradient at top of placeholder (top to 5%) */}
             <LinearGradient
               colors={['#FFFFFF', 'rgba(255, 255, 255, 0)']}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={[styles.videoFadeGradient, { height: videoDimensions.fadeGradientHeight }]}
+              style={[
+                styles.videoFadeGradient, 
+                { height: videoDimensions.fadeGradientHeight }
+              ]}
             />
-          </View>
+          </>
         )}
       </View>
 
-      {/* Top Content Section - Input, Location & Profile - Overlay on top of video */}
+      {/* Top Content Section - Input, Location & Profile - Top Layer (zIndex: 10) */}
       <View style={styles.topContent}>
         {/* Location and Profile Row */}
         <View style={styles.locationProfileRow}>
@@ -194,6 +242,36 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
   },
+  videoContainer: {
+    width: '100%',
+    position: 'relative', // Changed from absolute to relative
+    overflow: 'hidden',
+  },
+  greenBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    width: '100%',
+    backgroundColor: '#034703',
+    zIndex: 0,
+  },
+  backgroundVideo: {
+    width: '100%',
+    position: 'absolute', // Video inside is absolute to overlay text
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+  },
+  videoFadeGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    width: '100%',
+    zIndex: 2,
+  },
   topContent: {
     position: 'absolute',
     top: 0,
@@ -225,27 +303,20 @@ const styles = StyleSheet.create({
   searchBarContainer: {
     width: '100%',
   },
-  videoContainer: {
+  placeholderContent: {
     width: '100%',
-    position: 'relative',
-    top: 0,
-    left: 0,
-    right: 0,
-    overflow: 'hidden', // Clip the top 26px of the video
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
   },
-  backgroundVideo: {
-    width: '100%',
-    position: 'absolute',
-    left: 0,
+  placeholderText: {
+    color: '#FFFFFF',
+    fontSize: scale(14),
+    fontFamily: 'Inter',
+    fontWeight: '400',
   },
-  videoFadeGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    width: '100%',
-  },
-  muteButton: {
+  audioToggleButton: {
     position: 'absolute',
     bottom: getSpacing(16),
     right: getSpacing(16),
@@ -255,7 +326,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 20, // Ensure button is on top of video
+    zIndex: 15,
   },
 });
-

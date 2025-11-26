@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, ImageSourcePropType } from 'react-native';
-import LinearGradient from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../../types/navigation';
 import Text from '../common/Text';
 import WellbeingCard, { WellbeingProduct } from '../WellbeingCard';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - ready for API replacement
 const DUMMY_PRODUCTS: WellbeingProduct[] = [
@@ -12,25 +13,25 @@ const DUMMY_PRODUCTS: WellbeingProduct[] = [
     id: '1',
     name: 'Tiny Tummies',
     description: 'Wholesome bites for growing champs',
-    image: require('../assets/images/wellbeing/tiny-tummies.png'),
+    image: require('../../assets/images/wellbeing/tiny-tummies.png'),
   },
   {
     id: '2',
     name: 'Adult Well-being',
     description: 'Power your hustle\nwith clean eats',
-    image: require('../assets/images/wellbeing/adult-wellbeing.png'),
+    image: require('../../assets/images/wellbeing/adult-wellbeing.png'),
   },
   {
     id: '3',
     name: 'For Her',
     description: 'Balanced. Nourishing. Empowered',
-    image: require('../assets/images/wellbeing/for-her.png'),
+    image: require('../../assets/images/wellbeing/for-her.png'),
   },
   {
     id: '4',
     name: 'Golden Years',
     description: 'Soft, safe &\nsoul-soothing foods',
-    image: require('../assets/images/wellbeing/golden-years.png'),
+    image: require('../../assets/images/wellbeing/golden-years.png'),
   },
 ];
 
@@ -49,7 +50,7 @@ export default function WellbeingSection({
   const [products, setProducts] = useState<WellbeingProduct[]>(DUMMY_PRODUCTS);
   const [loading, setLoading] = useState(false);
 
-  const stars = starsImage || require('../assets/images/wellbeing/stars.png');
+  const stars = starsImage || require('../../assets/images/wellbeing/stars.png');
 
   // Placeholder for API integration
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function WellbeingSection({
           const data = await fetchProducts();
           setProducts(data);
         } catch (error) {
-          console.error('Error fetching wellbeing products:', error);
+          logger.error('Error fetching wellbeing products', error);
           // Fallback to dummy data on error
           setProducts(DUMMY_PRODUCTS);
         } finally {
@@ -80,7 +81,7 @@ export default function WellbeingSection({
       if (product && product.name === 'Tiny Tummies') {
         navigation.navigate('TinyTimmies');
       } else {
-        console.log('Wellbeing product pressed:', productId);
+        logger.info('Wellbeing product pressed', { productId });
       }
     }
   };

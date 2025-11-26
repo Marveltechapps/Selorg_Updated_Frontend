@@ -15,13 +15,32 @@ Before you begin, ensure you have the following installed:
 
 ## Initial Setup
 
-### 1. Install Dependencies
+### 1. Environment Configuration
+
+Copy the example environment file and configure it:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set the required values:
+
+```env
+GOOGLE_MAPS_API_KEY=your-api-key-here
+API_BASE_URL=https://api.example.com
+API_VERSION=/api/v1
+ENV=development
+```
+
+**Important**: The `GOOGLE_MAPS_API_KEY` is required. Get your API key from [Google Cloud Console](https://console.cloud.google.com/google/maps-apis).
+
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 2. iOS Setup (macOS only)
+### 3. iOS Setup (macOS only)
 
 Install CocoaPods dependencies:
 
@@ -31,7 +50,7 @@ pod install
 cd ..
 ```
 
-### 3. Android Setup
+### 4. Android Setup
 
 Ensure you have:
 - Android SDK installed
@@ -158,7 +177,64 @@ ios/build/ipa/Frontend.ipa
   - Android: Press `R` twice or `Ctrl+M` (Windows/Linux) / `Cmd+M` (macOS)
   - iOS: Press `Cmd+D` in simulator
 
+## Testing
+
+Run tests:
+
+```bash
+npm test                 # Run all tests
+npm run test:watch      # Watch mode
+npm run test:coverage   # Generate coverage report
+```
+
+See [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) for testing guidelines.
+
+## Code Quality
+
+```bash
+npm run lint            # Check for linting errors
+npm run lint:fix        # Fix linting errors automatically
+npm run format          # Format code with Prettier
+```
+
+## Architecture
+
+The app follows a modular architecture:
+
+- **Components**: Reusable UI components in `src/components/`
+- **Screens**: Screen components in `src/screens/`
+- **Services**: API and business logic in `src/services/`
+- **Contexts**: Global state management in `src/contexts/`
+- **Navigation**: Navigation configuration in `src/navigation/`
+- **Utils**: Utility functions in `src/utils/`
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Make your changes
+3. Run tests and linting: `npm test && npm run lint`
+4. Commit your changes (follow conventional commits)
+5. Push and create a pull request
+
+## Troubleshooting
+
+### Environment Variables Not Working
+
+After updating `.env`, you may need to:
+- Restart Metro bundler
+- Rebuild the app: `npx expo prebuild --clean`
+
+### Google Maps API Key Issues
+
+- Ensure the API key is set in `.env`
+- Verify the key has Maps SDK enabled in Google Cloud Console
+- Check API key restrictions match your app's bundle identifier
+- Rebuild the app after setting the key
+
+See [SENTRY_SETUP.md](./SENTRY_SETUP.md) for error tracking setup.
+
 ## Learn More
 
 - [React Native Documentation](https://reactnative.dev)
 - [React Native Getting Started](https://reactnative.dev/docs/getting-started)
+- [Expo Documentation](https://docs.expo.dev)

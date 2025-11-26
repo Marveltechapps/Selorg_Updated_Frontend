@@ -1,5 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import PlusIcon from '../../icons/PlusIcon';
+import MinusIcon from '../../icons/MinusIcon';
 
 export interface CartItemData {
   id: string;
@@ -45,10 +47,10 @@ const CartItem: React.FC<CartItemProps> = ({ item, onQuantityChange, onRemove })
     }
     // Fallback to existing product images based on item id
     const productImages: { [key: string]: any } = {
-      '1': require('../assets/images/product-image-1.png'),
-      '2': require('../assets/images/product-image-item-1.png'),
+      '1': require('../../../assets/images/product-image-1.png'),
+      '2': require('../../../assets/images/product-image-item-1.png'),
     };
-    return productImages[item.id] || require('../assets/images/product-image-main.png');
+    return productImages[item.id] || require('../../../assets/images/product-image-main.png');
   };
 
   return (
@@ -84,16 +86,22 @@ const CartItem: React.FC<CartItemProps> = ({ item, onQuantityChange, onRemove })
             style={styles.quantityButton}
             onPress={handleDecrease}
             activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.quantityButtonText}>-</Text>
+            <MinusIcon width={20} height={20} color="#FFFFFF" />
           </TouchableOpacity>
-          <Text style={styles.quantityText}>{item.quantity}</Text>
+          <View style={styles.quantityDisplay}>
+            <Text style={styles.quantityText} numberOfLines={1} adjustsFontSizeToFit={true} minimumFontScale={0.8}>
+              {String(item.quantity)}
+            </Text>
+          </View>
           <TouchableOpacity
             style={styles.quantityButton}
             onPress={handleIncrease}
             activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.quantityButtonText}>+</Text>
+            <PlusIcon width={20} height={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
@@ -106,9 +114,9 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    gap: 12,
+    paddingVertical: 6, // Reduced by 50% (was 12)
+    paddingHorizontal: 8, // Reduced by 50% (was 16)
+    gap: 6, // Reduced by 50% (was 12)
     alignSelf: 'stretch',
   },
   mainContent: {
@@ -201,38 +209,40 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 10,
-    width: 88,
+    width: 110, // Increased from 88 for more width
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#034703',
+    backgroundColor: '#034703', // Match "Continue to Payment" button color
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#023302',
-    shadowColor: '#000',
+    borderColor: '#012D01', // Match ProductCard addButton border color
+    shadowColor: '#011501', // Match ProductCard addButton shadow color
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.31,
     shadowRadius: 3,
-    elevation: 2,
+    elevation: 0, // Match ProductCard addButton elevation
     alignSelf: 'flex-start',
   },
   quantityButton: {
-    width: 10,
+    width: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
-  quantityButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#FFFFFF',
-    lineHeight: 20, // 1.4285714285714286em
+  quantityDisplay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    minWidth: 10,
   },
   quantityText: {
-    fontSize: 14,
+    fontFamily: 'Inter',
     fontWeight: '500',
+    fontSize: 14,
+    lineHeight: 20,
     color: '#FFFFFF',
-    width: 10,
     textAlign: 'center',
-    lineHeight: 20, // 1.4285714285714286em
   },
 });
 

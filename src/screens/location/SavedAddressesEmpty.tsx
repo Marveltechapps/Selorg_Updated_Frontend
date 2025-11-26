@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { LocationStackNavigationProp } from '../../types/navigation';
 import Header from '../../components/layout/Header';
 import LocationIcon from '../../assets/images/location-icon.svg';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const EMPTY_STATE_MESSAGE = 'No address Found';
@@ -50,7 +51,7 @@ const SavedAddressesEmpty: React.FC = () => {
           return;
         }
       } catch (error) {
-        console.error('Error fetching addresses:', error);
+        logger.error('Error fetching addresses', error);
       } finally {
         setLoading(false);
       }

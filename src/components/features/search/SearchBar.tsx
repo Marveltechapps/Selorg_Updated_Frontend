@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { RootStackNavigationProp } from '../../../types/navigation';
+import type { RootStackNavigationProp } from '@/types/navigation';
 import SearchIcon from '../../icons/SearchIcon';
 
 interface SearchBarProps {
@@ -10,7 +10,11 @@ interface SearchBarProps {
   onPress?: () => void;
 }
 
-export default function SearchBar({ placeholder = 'Search for "Dal" ', onSearch, onPress }: SearchBarProps) {
+export default function SearchBar({ 
+  placeholder = 'Search for "Dal" ', 
+  onSearch, 
+  onPress,
+}: SearchBarProps) {
   const navigation = useNavigation<RootStackNavigationProp>();
   const [searchText, setSearchText] = useState('');
 

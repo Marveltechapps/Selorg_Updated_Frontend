@@ -13,6 +13,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { LocationStackNavigationProp } from '../../types/navigation';
 import Header from '../../components/layout/Header';
 import MapPinIcon from '../../assets/images/map-pin-4.svg';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 interface LocationData {
@@ -46,7 +47,7 @@ const MapAddressPin: React.FC = () => {
         // Using dummy data for now
         setSelectedLocation(location);
       } catch (error) {
-        console.error('Error fetching location details:', error);
+        logger.error('Error fetching location details', error);
         setSelectedLocation(location);
       } finally {
         setLoading(false);

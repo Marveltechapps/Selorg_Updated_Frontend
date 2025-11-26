@@ -63,15 +63,15 @@ export default function CategoryCard({ image, name, onPress, width }: CategoryCa
         onPressOut={handlePressOut}
         activeOpacity={1}
       >
-      <View style={[styles.imageContainer, { width: cardWidth }]}>
-        <Image source={image} style={styles.image} resizeMode="contain" />
-      </View>
-      <View style={[styles.textContainer, { width: cardWidth }]}>
-        <Text style={styles.categoryName} numberOfLines={2}>
-          {name}
-        </Text>
-      </View>
-    </TouchableOpacity>
+        <View style={[styles.imageContainer, { width: cardWidth }]}>
+          <Image source={image} style={styles.image} resizeMode="contain" />
+        </View>
+        <View style={[styles.textContainer, { width: cardWidth }]}>
+          <Text style={styles.categoryName} numberOfLines={2}>
+            {name}
+          </Text>
+        </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 }

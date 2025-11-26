@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - Replace with API call later
 const ONBOARDING_DATA = {
@@ -67,7 +68,7 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
         navigation.replace('Login');
       }
     } catch (error) {
-      console.error('Error handling skip:', error);
+      logger.error('Error handling skip', error);
     }
   };
 
@@ -88,7 +89,7 @@ const OnboardingScreen1: React.FC<OnboardingScreen1Props> = ({
         navigation.navigate('OnboardingScreen2');
       }
     } catch (error) {
-      console.error('Error handling next:', error);
+      logger.error('Error handling next', error);
     } finally {
       setLoading(false);
     }

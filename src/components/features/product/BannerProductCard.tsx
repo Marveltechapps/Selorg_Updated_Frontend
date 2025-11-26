@@ -1,12 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import Text from '../../common/Text';
 import RupeeIcon from '../../icons/RupeeIcon';
 import DropdownArrowIcon from '../../icons/DropdownArrowIcon';
 import PlusIcon from '../../icons/PlusIcon';
 import MinusIcon from '../../icons/MinusIcon';
-import { useCart } from '../../../contexts/CartContext';
-import { useDimensions, scale, scaleFont, getSpacing, getCardWidth } from '../../../utils/responsive';
+import { useCart } from '@/contexts/CartContext';
+import { useDimensions, scale, scaleFont, getSpacing, getCardWidth } from '@/utils/responsive';
+import { logger } from '@/utils/logger';
 
 export interface BannerProduct {
   id: string;
@@ -76,18 +77,18 @@ export default function BannerProductCard({
     : rawCartQuantity;
   const hasQuantity = cartQuantity > 0;
 
-  const handleQuantityPress = () => {
+  const handleQuantityPress = useCallback(() => {
     // Always open modal when clicking quantity selector
     if (onCardPress) {
       onCardPress(product.id);
     } else if (onQuantityPress) {
       onQuantityPress(product.id);
     } else {
-      console.log('Quantity selector pressed for product:', product.id);
+      logger.info('Quantity selector pressed for product', { productId: product.id });
     }
-  };
+  }, [product.id, onCardPress, onQuantityPress]);
 
-  const handleAddPress = () => {
+  const handleAddPress = useCallback(() => {
     // Add button adds item to cart with first/active variant
     // Fix both issues: prevent flicker (2→1) and ensure single click works - same as ProductCard
     if (activeVariantId && variants.length > 0) {
@@ -134,31 +135,31 @@ export default function BannerProductCard({
     } else if (onAddPress) {
       onAddPress(product.id);
     } else {
-      console.log('Add to cart:', product.id);
+      logger.info('Add to cart', { productId: product.id });
     }
-  };
+  }, [activeVariantId, variants, getItemQuantity, cartItems, addToCart, updateQuantity, product, onAddPress]);
 
-  const handleAddButtonDecrease = (e: any) => {
+  const handleAddButtonDecrease = useCallback((e: any) => {
     e?.stopPropagation?.();
     if (activeVariantId && cartQuantity > 0) {
       const newQuantity = cartQuantity - 1;
       updateQuantity(activeVariantId, newQuantity);
     }
-  };
+  }, [activeVariantId, cartQuantity, updateQuantity]);
 
-  const handleAddButtonIncrease = (e: any) => {
+  const handleAddButtonIncrease = useCallback((e: any) => {
     e?.stopPropagation?.();
     if (activeVariantId && cartQuantity >= 0) {
       const newQuantity = cartQuantity + 1;
       updateQuantity(activeVariantId, newQuantity);
     }
-  };
+  }, [activeVariantId, cartQuantity, updateQuantity]);
 
-  const handleCardPress = () => {
+  const handleCardPress = useCallback(() => {
     if (onCardPress) {
       onCardPress(product.id);
     }
-  };
+  }, [product.id, onCardPress]);
 
   return (
     <View style={[styles.container, width ? { width, maxWidth: width } : { width: cardWidth }]}>

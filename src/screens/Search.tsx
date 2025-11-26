@@ -6,6 +6,7 @@ import type { RootStackNavigationProp } from '../types/navigation';
 import BackIcon from '../components/icons/BackIcon';
 import Text from '../components/common/Text';
 import SearchSuggestionItem from '../components/features/search/SearchSuggestionItem';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - ready for API replacement
 interface SearchItem {
@@ -91,7 +92,7 @@ export default function SearchScreen({
             const results = await fetchSearchData(searchText);
             setSearchResults(results);
           } catch (error) {
-            console.error('Error fetching search data:', error);
+            logger.error('Error fetching search data', error);
             setSearchResults([]);
           } finally {
             setLoading(false);
@@ -167,6 +168,9 @@ export default function SearchScreen({
                   onChangeText={setSearchText}
                   autoFocus
                   returnKeyType="search"
+                  textAlignVertical="center"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                 />
               </View>
 
@@ -255,17 +259,18 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     justifyContent: 'stretch',
-    alignItems: 'stretch',
+    alignItems: 'center', // Center all items vertically
     alignSelf: 'stretch',
     backgroundColor: '#FFFFFF',
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 0,
-    height: 40,
+    borderRadius: 8.5,
+    paddingHorizontal: 12,
+    paddingVertical: 0, // Remove vertical padding to use alignItems: center
+    minHeight: 48,
+    height: 48,
   },
   backButton: {
     width: 32,
-    height: 40,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
@@ -274,25 +279,30 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center', // Center content vertically
     gap: 4,
-    height: 22.39,
     alignSelf: 'center',
+    height: '100%', // Full height of parent container
   },
   searchInput: {
     flex: 1,
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '400',
-    lineHeight: 20,
+    lineHeight: 18, // Slightly larger than fontSize (14 * 1.28 ≈ 18)
     color: '#3B3B3B',
-    padding: 0,
+    paddingHorizontal: 0, // Horizontal padding handled by container
+    paddingVertical: 0, // No vertical padding for perfect centering
     margin: 0,
     textAlign: 'left',
-    height: 22.39,
+    textAlignVertical: 'center', // Vertically center text
+    includeFontPadding: false, // Remove extra font padding
+    numberOfLines: 1, // Single line, no wrapping
+    ellipsizeMode: 'tail', // Ellipsize if too long
   },
   clearButton: {
     width: 32,
-    height: 40,
+    height: 48,
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,

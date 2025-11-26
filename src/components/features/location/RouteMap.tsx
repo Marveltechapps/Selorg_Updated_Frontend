@@ -21,8 +21,9 @@ import MapView, { Marker, PROVIDER_GOOGLE, Region } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import * as Location from 'expo-location';
 import Constants from 'expo-constants';
+import { logger } from '@/utils/logger';
 
-const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey || 'AIzaSyAKVumkjaEhGUefBCclE23rivFqPK3LDRQ';
+const GOOGLE_MAPS_API_KEY = Constants.expoConfig?.extra?.googleMapsApiKey;
 
 interface RouteMapProps {
   deliveryAddress: string;
@@ -49,6 +50,20 @@ const RouteMap: React.FC<RouteMapProps> = ({
   currentLocation: providedCurrentLocation,
   height = 200,
 }) => {
+  // Validate API key
+  if (!GOOGLE_MAPS_API_KEY) {
+    return (
+      <View style={[styles.container, styles.errorContainer, { height }]}>
+        <View style={styles.errorContent}>
+          <Text style={styles.errorTitle}>Configuration Error</Text>
+          <Text style={styles.errorText}>
+            Google Maps API key is not configured. Please set GOOGLE_MAPS_API_KEY in your .env file and rebuild the app.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   const [currentLocation, setCurrentLocation] = useState<Location | null>(
     providedCurrentLocation || null
   );
@@ -82,7 +97,7 @@ const RouteMap: React.FC<RouteMapProps> = ({
         setLoading(false);
       }
     } catch (err) {
-      console.error('Error requesting location permission:', err);
+      logger.error('Error requesting location permission', err);
       setErrorType('other');
       setError('Failed to request location permission');
       setLoading(false);
@@ -126,7 +141,7 @@ const RouteMap: React.FC<RouteMapProps> = ({
       setHasLocationPermission(true);
       initializeMap(locationData);
     } catch (error: any) {
-      console.error('Error getting location:', error);
+      logger.error('Error getting location', error);
       
       // Handle specific error types
       if (error.code === 'E_LOCATION_UNAVAILABLE') {
@@ -149,7 +164,12 @@ const RouteMap: React.FC<RouteMapProps> = ({
 
   // Retry getting location
   const handleRetry = async () => {
-    await requestLocationPermission();
+    try {
+      await requestLocationPermission();
+    } catch (error) {
+      logger.error('Error retrying location permission', error);
+      setError('Failed to request location permission. Please try again.');
+    }
   };
 
   // Geocode delivery address to coordinates
@@ -171,7 +191,7 @@ const RouteMap: React.FC<RouteMapProps> = ({
         throw new Error('Geocoding failed');
       }
     } catch (err) {
-      console.error('Error geocoding address:', err);
+      logger.error('Error geocoding address', err);
       return null;
     }
   };
@@ -218,7 +238,7 @@ const RouteMap: React.FC<RouteMapProps> = ({
 
       setLoading(false);
     } catch (err) {
-      console.error('Error initializing map:', err);
+      logger.error('Error initializing map', err);
       setError('Failed to initialize map');
       setLoading(false);
     }
@@ -374,10 +394,10 @@ const RouteMap: React.FC<RouteMapProps> = ({
         loadingEnabled={true}
         loadingIndicatorColor="#034703"
         onMapReady={() => {
-          console.log('Map is ready');
+          logger.info('Map is ready');
         }}
         onError={(error) => {
-          console.error('MapView error:', error);
+          logger.error('MapView error', error);
           setError('Map failed to load. Please check your internet connection.');
           setErrorType('other');
         }}
@@ -426,7 +446,7 @@ const RouteMap: React.FC<RouteMapProps> = ({
               }
             }}
             onError={(errorMessage) => {
-              console.error('Directions error:', errorMessage);
+              logger.error('Directions error', errorMessage);
               // Don't set error state for directions errors, just log them
               // The map will still show markers even if directions fail
             }}

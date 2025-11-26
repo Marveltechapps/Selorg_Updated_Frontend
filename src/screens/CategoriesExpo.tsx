@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, Platform, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import LinearGradient from 'expo-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { RootStackNavigationProp } from '../types/navigation';
 import SearchIcon from '../components/icons/SearchIcon';
 import Text from '../components/common/Text';
 import CategoryCard from '../components/CategoryCard';
 import FloatingCartBar from '../components/features/cart/FloatingCartBar';
 import { useDimensions, getSpacing, scale } from '../utils/responsive';
+import { logger } from '@/utils/logger';
 
 // Dummy static data - ready for API replacement
 interface Category {
@@ -90,7 +91,7 @@ export default function CategoriesScreen({
           const data = await fetchCategories();
           setCategoryGroups(data);
         } catch (error) {
-          console.error('Error fetching categories:', error);
+          logger.error('Error fetching categories', error);
           // Fallback to dummy data on error
           setCategoryGroups(DUMMY_CATEGORY_GROUPS);
         } finally {

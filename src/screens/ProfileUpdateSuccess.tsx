@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import SuccessIconContainer from '../assets/images/success-icon-container.svg';
 import SuccessBackground from '../assets/images/success-background.svg';
+import { logger } from '@/utils/logger';
 
 interface ProfileUpdateSuccessProps {
   visible: boolean;
@@ -23,7 +24,7 @@ const ProfileUpdateSuccess: React.FC<ProfileUpdateSuccessProps> = ({
     if (onDone) {
       onDone();
     } else {
-      console.log('Done pressed');
+      logger.info('Done pressed');
     }
   };
 

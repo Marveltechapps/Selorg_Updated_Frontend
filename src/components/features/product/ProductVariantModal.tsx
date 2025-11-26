@@ -16,7 +16,8 @@ import RupeeIcon from '../../icons/RupeeIcon';
 import CloseIcon from '../../icons/CloseIcon';
 import PlusIcon from '../../icons/PlusIcon';
 import MinusIcon from '../../icons/MinusIcon';
-import { useCart } from '../../../contexts/CartContext';
+import { useCart } from '@/contexts/CartContext';
+import { logger } from '@/utils/logger';
 
 export interface ProductVariant {
   id: string;
@@ -46,7 +47,7 @@ const DUMMY_VARIANTS: ProductVariant[] = [
   {
     id: '1',
     size: '500 g',
-    image: require('../assets/images/product-image-1.png'),
+    image: require('../../../assets/images/product-image-1.png'),
     price: 126,
     originalPrice: 256,
     discount: '16% OFF',
@@ -55,7 +56,7 @@ const DUMMY_VARIANTS: ProductVariant[] = [
   {
     id: '2',
     size: '1 kg',
-    image: require('../assets/images/product-image-1.png'),
+    image: require('../../../assets/images/product-image-1.png'),
     price: 126,
     originalPrice: 256,
     discount: '16% OFF',
@@ -64,7 +65,7 @@ const DUMMY_VARIANTS: ProductVariant[] = [
   {
     id: '3',
     size: '2 kg',
-    image: require('../assets/images/product-image-1.png'),
+    image: require('../../../assets/images/product-image-1.png'),
     price: 126,
     originalPrice: 256,
     discount: '16% OFF',
@@ -147,7 +148,7 @@ export default function ProductVariantModal({
             const data = await fetchVariants();
             setVariantList(data && data.length > 0 ? data : DUMMY_VARIANTS);
           } catch (error) {
-            console.error('Error fetching variants:', error);
+            logger.error('Error fetching variants', error);
             setVariantList(DUMMY_VARIANTS);
           } finally {
             setLoading(false);
@@ -253,7 +254,13 @@ export default function ProductVariantModal({
       // Immediately ensure quantity is 1 (in case addToCart incremented due to race condition)
       // Use a microtask to ensure addToCart state update completes first
       Promise.resolve().then(() => {
-        updateQuantity(variantId, 1);
+        try {
+          updateQuantity(variantId, 1);
+        } catch (error) {
+          logger.error('Error updating quantity after add to cart', error);
+        }
+      }).catch((error) => {
+        logger.error('Error in quantity update promise', error);
       });
     } else {
       // Item already in cart, set quantity to 1 (not increment)

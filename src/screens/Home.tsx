@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { RootStackNavigationProp } from '../types/navigation';
 import TopSection from '../components/layout/TopSection';
-import VideoSection from '../components/sections/VideoSection';
 import CategorySection from '../components/sections/CategorySection';
 import Banner from '../components/Banner';
 import DealsSection from '../components/sections/DealsSection';
@@ -17,6 +16,8 @@ import FreshJuiceDealsSection from '../components/sections/FreshJuiceDealsSectio
 import BannerSection from '../components/sections/BannerSection';
 import OrganicTaglineSection from '../components/sections/OrganicTaglineSection';
 import FloatingCartBar from '../components/features/cart/FloatingCartBar';
+import ErrorBoundary from '../components/common/ErrorBoundary';
+import { logger } from '@/utils/logger';
 
 // Number of sections to animate (excluding TopSection which is already animated)
 const SECTION_COUNT = 12;
@@ -26,6 +27,7 @@ export default function HomeScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const [videoLayout, setVideoLayout] = useState({ y: 0, height: 0 });
   const [isVideoVisible, setIsVideoVisible] = useState(true);
+  const [isScreenFocused, setIsScreenFocused] = useState(true);
 
   // Staggered animations for each section
   const sectionAnimations = useRef(
@@ -38,6 +40,9 @@ export default function HomeScreen() {
   // Animate sections when screen is focused
   useFocusEffect(
     useCallback(() => {
+      // Screen is focused
+      setIsScreenFocused(true);
+      
       // Reset all animation values
       sectionAnimations.forEach((anim) => {
         anim.opacity.setValue(0);
@@ -65,6 +70,11 @@ export default function HomeScreen() {
       });
 
       Animated.parallel(animations).start();
+
+      // Cleanup when screen loses focus
+      return () => {
+        setIsScreenFocused(false);
+      };
     }, [])
   );
 
@@ -73,7 +83,7 @@ export default function HomeScreen() {
   };
 
   const handleLocationPress = () => {
-    console.log('Location selector pressed');
+    logger.info('Location selector pressed');
     // Handle location selection
   };
 
@@ -119,15 +129,24 @@ export default function HomeScreen() {
             scrollEventThrottle={16}
           >
             {/* Top Section with Input, Location, Profile and Video */}
-            <TopSection
-            deliveryType="Delivery to Home"
-            address="Vasantha Bhavan Hotel, 3rd floor....."
-            searchPlaceholder='Search for "Dal" '
-            onLocationPress={handleLocationPress}
-            onProfilePress={handleProfilePress}
-              onLayout={handleVideoLayout}
-              isVisible={isVideoVisible}
-          />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 200 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Top section unavailable</Text>
+                </View>
+              }
+            >
+              <TopSection
+                deliveryType="Delivery to Home"
+                address="Vasantha Bhavan Hotel, 3rd floor....."
+                searchPlaceholder='Search for "Dal" '
+                onLocationPress={handleLocationPress}
+                onProfilePress={handleProfilePress}
+                onLayout={handleVideoLayout}
+                isVisible={isVideoVisible}
+                isScreenFocused={isScreenFocused}
+              />
+            </ErrorBoundary>
 
           {/* Video Section */}
           {/* <VideoSection /> */}
@@ -139,7 +158,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[0].translateY }],
             }}
           >
-            <CategorySection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Category section unavailable</Text>
+                </View>
+              }
+            >
+              <CategorySection />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Banner Section - Animated */}
@@ -149,7 +176,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[1].translateY }],
             }}
           >
-            <Banner />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Banner section unavailable</Text>
+                </View>
+              }
+            >
+              <Banner />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Deals Section - Animated */}
@@ -159,7 +194,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[2].translateY }],
             }}
           >
-            <DealsSection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Deals section unavailable</Text>
+                </View>
+              }
+            >
+              <DealsSection />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Wellbeing Section - Animated */}
@@ -169,7 +212,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[3].translateY }],
             }}
           >
-            <WellbeingSection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Wellbeing section unavailable</Text>
+                </View>
+              }
+            >
+              <WellbeingSection />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Greens Banner Section - Animated */}
@@ -179,7 +230,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[4].translateY }],
             }}
           >
-            <GreensBanner />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Greens banner unavailable</Text>
+                </View>
+              }
+            >
+              <GreensBanner />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Section Image - Animated */}
@@ -189,7 +248,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[5].translateY }],
             }}
           >
-            <SectionImage />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Section image unavailable</Text>
+                </View>
+              }
+            >
+              <SectionImage />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Lifestyle Section - Animated */}
@@ -199,7 +266,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[6].translateY }],
             }}
           >
-            <LifestyleSection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Lifestyle section unavailable</Text>
+                </View>
+              }
+            >
+              <LifestyleSection />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* New Deals Section - Animated */}
@@ -209,7 +284,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[7].translateY }],
             }}
           >
-            <NewDealsSection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>New deals section unavailable</Text>
+                </View>
+              }
+            >
+              <NewDealsSection />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Banner Section - Animated */}
@@ -219,7 +302,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[8].translateY }],
             }}
           >
-            <BannerSection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Banner section unavailable</Text>
+                </View>
+              }
+            >
+              <BannerSection />
+            </ErrorBoundary>
           </Animated.View>
 
           {/* Fresh Juice Deals Section - Animated */}
@@ -229,7 +320,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[9].translateY }],
             }}
           >
-            <FreshJuiceDealsSection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Fresh juice deals unavailable</Text>
+                </View>
+              }
+            >
+              <FreshJuiceDealsSection />
+            </ErrorBoundary>
           </Animated.View>
 
            {/* Deals Section - Animated */}
@@ -239,7 +338,15 @@ export default function HomeScreen() {
               transform: [{ translateY: sectionAnimations[10].translateY }],
             }}
           >
-            <DealsSection />
+            <ErrorBoundary
+              fallback={
+                <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                  <Text style={{ color: '#666', textAlign: 'center' }}>Deals section unavailable</Text>
+                </View>
+              }
+            >
+              <DealsSection />
+            </ErrorBoundary>
           </Animated.View>
 
             {/* Organic Tagline Section - Last Item - Animated */}
@@ -249,13 +356,25 @@ export default function HomeScreen() {
                 transform: [{ translateY: sectionAnimations[11].translateY }],
               }}
             >
-              <OrganicTaglineSection />
+              <ErrorBoundary
+                fallback={
+                  <View style={{ padding: 16, backgroundColor: '#FFFFFF', minHeight: 100 }}>
+                    <Text style={{ color: '#666', textAlign: 'center' }}>Organic tagline unavailable</Text>
+                  </View>
+                }
+              >
+                <OrganicTaglineSection />
+              </ErrorBoundary>
             </Animated.View>
           </ScrollView>
         </View>
 
         {/* Floating Cart Bar - positioned right above bottom navigation bar */}
-        <FloatingCartBar onPress={() => navigation.navigate('Cart')} hasBottomNav={true} />
+        <ErrorBoundary
+          fallback={null} // Don't show error UI for cart bar, just fail silently
+        >
+          <FloatingCartBar onPress={() => navigation.navigate('Cart')} hasBottomNav={true} />
+        </ErrorBoundary>
       </SafeAreaView>
     </View>
   );
@@ -276,6 +395,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 80, // Add padding to prevent content from being hidden behind bottom nav (handled by tab navigator)
+    paddingBottom: 20, // Reduced padding to prevent excessive space at bottom
   },
 });

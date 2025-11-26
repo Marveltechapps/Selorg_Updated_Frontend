@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, useRef, useCallb
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import { NavigationContainerRef } from '@react-navigation/native';
 import type { RootStackParamList } from '../types/navigation';
+import { logger } from '@/utils/logger';
 
 interface NetworkContextType {
   isConnected: boolean | null;
@@ -24,19 +25,22 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     // Check if NetInfo native module is available
     if (!NetInfo || typeof NetInfo.fetch !== 'function') {
-      console.warn('NetInfo native module is not available. Network monitoring disabled.');
+      logger.warn('NetInfo native module is not available. Network monitoring disabled.');
       return;
     }
 
     // Get initial network state
-    NetInfo.fetch()
-      .then((state: NetInfoState) => {
+    const fetchInitialNetworkState = async () => {
+      try {
+        const state = await NetInfo.fetch();
         setIsConnected(state.isConnected ?? false);
-      })
-      .catch((error) => {
-        console.error('Error fetching initial network state:', error);
+      } catch (error) {
+        logger.error('Error fetching initial network state', error);
         setIsConnected(null);
-      });
+      }
+    };
+    
+    fetchInitialNetworkState();
 
     // Subscribe to network state changes
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {

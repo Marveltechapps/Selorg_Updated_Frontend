@@ -1,12 +1,15 @@
 import React, { Suspense } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../types/navigation';
+import ErrorBoundary from '../components/common/ErrorBoundary';
+import ScreenErrorFallback from '../components/common/ScreenErrorFallback';
 
 // Critical screens - load immediately
 import SplashScreen from '../screens/SplashScreen';
 import NoInternet from '../screens/NoInternet';
 import Login from '../screens/Login';
+import Home from '../screens/Home'; // Direct import to match MainTabNavigator
 
 // Lazy load other screens for better performance
 const Onboarding = React.lazy(() => import('../screens/Onboarding'));
@@ -25,7 +28,6 @@ const GeneralInfoStack = React.lazy(() => import('./GeneralInfoStack'));
 const Notifications = React.lazy(() => import('../screens/Notifications'));
 const Checkout = React.lazy(() => import('../screens/Checkout'));
 const Coupons = React.lazy(() => import('../screens/Coupons'));
-const Home = React.lazy(() => import('../screens/Home'));
 const Category = React.lazy(() => import('../screens/Category'));
 const Search = React.lazy(() => import('../screens/Search'));
 const SearchResults = React.lazy(() => import('../screens/SearchResults'));
@@ -35,19 +37,34 @@ const BannerDetail = React.lazy(() => import('../screens/BannerDetail'));
 const TinyTimmies = React.lazy(() => import('../screens/TinyTimmies'));
 const CategoriesExpo = React.lazy(() => import('../screens/CategoriesExpo'));
 
-// Loading fallback component
-const LoadingFallback = () => (
-  <View style={styles.loadingContainer}>
-    <ActivityIndicator size="large" color="#007AFF" />
-  </View>
-);
+// Loading fallback component - Empty to prevent loading indicator during navigation
+const LoadingFallback = () => null;
 
-// Wrapper component for lazy-loaded screens
-const LazyScreen = ({ component: Component, ...props }: any) => (
-  <Suspense fallback={<LoadingFallback />}>
-    <Component {...props} />
-  </Suspense>
-);
+// Helper function to create lazy screen wrapper with error boundary
+const createLazyScreen = (
+  LazyComponent: React.LazyExoticComponent<React.ComponentType<any>>,
+  screenName?: string
+) => {
+  return (props: any) => (
+    <ErrorBoundary
+      fallback={
+        <ScreenErrorFallback
+          onRetry={() => {
+            // Force re-render by updating key or state
+            // Navigation will handle the reset
+          }}
+        />
+      }
+      onError={(error, errorInfo) => {
+        console.error(`Error in lazy-loaded screen: ${screenName || 'Unknown'}`, error, errorInfo);
+      }}
+    >
+      <Suspense fallback={<LoadingFallback />}>
+        <LazyComponent {...props} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+};
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -70,13 +87,13 @@ const AppNavigator: React.FC = () => {
             gestureEnabled: false, // Prevent swipe back from splash
           }}
         />
-        <Stack.Screen name="Onboarding" component={(props: any) => <LazyScreen component={Onboarding} {...props} />} />
+        <Stack.Screen name="Onboarding" component={createLazyScreen(Onboarding, 'Onboarding')} />
         <Stack.Screen name="NoInternet" component={NoInternet} />
         <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="OTPVerification" component={(props: any) => <LazyScreen component={OTPVerification} {...props} />} />
+        <Stack.Screen name="OTPVerification" component={createLazyScreen(OTPVerification, 'OTPVerification')} />
         <Stack.Screen 
           name="VerificationSuccess" 
-          component={(props: any) => <LazyScreen component={VerificationSuccess} {...props} />}
+          component={createLazyScreen(VerificationSuccess, 'VerificationSuccess')}
           options={{
             animation: 'none', // No animation for success screen
             gestureEnabled: false, // Prevent swipe back
@@ -84,33 +101,33 @@ const AppNavigator: React.FC = () => {
         />
         <Stack.Screen 
           name="MainTabs" 
-          component={(props: any) => <LazyScreen component={MainTabNavigator} {...props} />}
+          component={createLazyScreen(MainTabNavigator, 'MainTabs')}
           options={{
             headerShown: false,
             gestureEnabled: false, // Prevent swipe back from main tabs
           }}
         />
-        <Stack.Screen name="Checkout" component={(props: any) => <LazyScreen component={Checkout} {...props} />} />
-        <Stack.Screen name="OrderStatus" component={(props: any) => <LazyScreen component={OrderStatusStack} {...props} />} />
-        <Stack.Screen name="Settings" component={(props: any) => <LazyScreen component={Settings} {...props} />} />
-        <Stack.Screen name="Orders" component={(props: any) => <LazyScreen component={OrdersStack} {...props} />} />
-        <Stack.Screen name="CustomerSupport" component={(props: any) => <LazyScreen component={CustomerSupportStack} {...props} />} />
-        <Stack.Screen name="Addresses" component={(props: any) => <LazyScreen component={LocationStack} {...props} />} />
-        <Stack.Screen name="Refunds" component={(props: any) => <LazyScreen component={RefundsStack} {...props} />} />
-        <Stack.Screen name="Profile" component={(props: any) => <LazyScreen component={Profile} {...props} />} />
-        <Stack.Screen name="PaymentManagement" component={(props: any) => <LazyScreen component={PaymentManagement} {...props} />} />
-        <Stack.Screen name="GeneralInfo" component={(props: any) => <LazyScreen component={GeneralInfoStack} {...props} />} />
-        <Stack.Screen name="Notifications" component={(props: any) => <LazyScreen component={Notifications} {...props} />} />
-        <Stack.Screen name="Coupons" component={(props: any) => <LazyScreen component={Coupons} {...props} />} />
-        <Stack.Screen name="Home" component={(props: any) => <LazyScreen component={Home} {...props} />} />
-        <Stack.Screen name="Category" component={(props: any) => <LazyScreen component={Category} {...props} />} />
-        <Stack.Screen name="Search" component={(props: any) => <LazyScreen component={Search} {...props} />} />
-        <Stack.Screen name="SearchResults" component={(props: any) => <LazyScreen component={SearchResults} {...props} />} />
-        <Stack.Screen name="ProductDetail" component={(props: any) => <LazyScreen component={ProductDetail} {...props} />} />
-        <Stack.Screen name="CategoryProducts" component={(props: any) => <LazyScreen component={CategoryProducts} {...props} />} />
-        <Stack.Screen name="BannerDetail" component={(props: any) => <LazyScreen component={BannerDetail} {...props} />} />
-        <Stack.Screen name="TinyTimmies" component={(props: any) => <LazyScreen component={TinyTimmies} {...props} />} />
-        <Stack.Screen name="CategoriesExpo" component={(props: any) => <LazyScreen component={CategoriesExpo} {...props} />} />
+        <Stack.Screen name="Checkout" component={createLazyScreen(Checkout, 'Checkout')} />
+        <Stack.Screen name="OrderStatus" component={createLazyScreen(OrderStatusStack, 'OrderStatus')} />
+        <Stack.Screen name="Settings" component={createLazyScreen(Settings, 'Settings')} />
+        <Stack.Screen name="Orders" component={createLazyScreen(OrdersStack, 'Orders')} />
+        <Stack.Screen name="CustomerSupport" component={createLazyScreen(CustomerSupportStack, 'CustomerSupport')} />
+        <Stack.Screen name="Addresses" component={createLazyScreen(LocationStack, 'Addresses')} />
+        <Stack.Screen name="Refunds" component={createLazyScreen(RefundsStack, 'Refunds')} />
+        <Stack.Screen name="Profile" component={createLazyScreen(Profile, 'Profile')} />
+        <Stack.Screen name="PaymentManagement" component={createLazyScreen(PaymentManagement, 'PaymentManagement')} />
+        <Stack.Screen name="GeneralInfo" component={createLazyScreen(GeneralInfoStack, 'GeneralInfo')} />
+        <Stack.Screen name="Notifications" component={createLazyScreen(Notifications, 'Notifications')} />
+        <Stack.Screen name="Coupons" component={createLazyScreen(Coupons, 'Coupons')} />
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Category" component={createLazyScreen(Category, 'Category')} />
+        <Stack.Screen name="Search" component={createLazyScreen(Search, 'Search')} />
+        <Stack.Screen name="SearchResults" component={createLazyScreen(SearchResults, 'SearchResults')} />
+        <Stack.Screen name="ProductDetail" component={createLazyScreen(ProductDetail, 'ProductDetail')} />
+        <Stack.Screen name="CategoryProducts" component={createLazyScreen(CategoryProducts, 'CategoryProducts')} />
+        <Stack.Screen name="BannerDetail" component={createLazyScreen(BannerDetail, 'BannerDetail')} />
+        <Stack.Screen name="TinyTimmies" component={createLazyScreen(TinyTimmies, 'TinyTimmies')} />
+        <Stack.Screen name="CategoriesExpo" component={createLazyScreen(CategoriesExpo, 'CategoriesExpo')} />
       </Stack.Navigator>
     </View>
   );
@@ -119,12 +136,6 @@ const AppNavigator: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F5F5F5',
   },
 });

@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { VideoView, useVideoPlayer } from 'expo-av';
-import { useDimensions, scale, getSpacing, wp } from '../../utils/responsive';
+import { useDimensions, scale, getSpacing } from '../../utils/responsive';
 
 interface VideoSectionProps {
   onPress?: () => void;
@@ -15,7 +14,6 @@ export default function VideoSection({ onPress }: VideoSectionProps) {
     const containerPadding = getSpacing(16) * 2; // 16px on each side
     const videoWidth = screenWidth - containerPadding;
     // Maintain aspect ratio from design (276px height for ~349px width)
-    // Use responsive height that scales with width
     const aspectRatio = 276 / 349; // Original design aspect ratio
     const videoHeight = videoWidth * aspectRatio;
     
@@ -26,48 +24,24 @@ export default function VideoSection({ onPress }: VideoSectionProps) {
     };
   }, [screenWidth]);
 
-  // Use expo-av video player
-  const player = useVideoPlayer(require('../../assets/images/categories/video-section-png.mp4'), (player) => {
-    player.loop = true;
-    player.play();
-  });
-
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        {player ? (
-          <VideoView
-            player={player}
-            style={[
-              styles.video,
-              {
-                width: videoDimensions.videoWidth,
-                height: videoDimensions.videoHeight,
-              },
-            ]}
-            contentFit="cover"
-            nativeControls={false}
-            onError={(error: any) => {
-              console.warn('Video playback error:', error);
-            }}
-          />
-        ) : (
-          // Fallback: Show placeholder
-          <View
-            style={[
-              styles.video,
-              {
-                width: videoDimensions.videoWidth,
-                height: videoDimensions.videoHeight,
-                backgroundColor: '#EDEDED',
-                justifyContent: 'center',
-                alignItems: 'center',
-              },
-            ]}
-          >
-            {/* Video placeholder */}
-          </View>
-        )}
+        {/* Placeholder: Show placeholder for video (video player disabled for Expo Go compatibility) */}
+        <View
+          style={[
+            styles.video,
+            {
+              width: videoDimensions.videoWidth,
+              height: videoDimensions.videoHeight,
+              backgroundColor: '#EDEDED',
+              justifyContent: 'center',
+              alignItems: 'center',
+            },
+          ]}
+        >
+          {/* Placeholder for video in Expo Go */}
+        </View>
       </View>
     </View>
   );
@@ -91,4 +65,3 @@ const styles = StyleSheet.create({
     backgroundColor: '#EDEDED',
   },
 });
-
